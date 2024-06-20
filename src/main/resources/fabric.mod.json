@@ -5,7 +5,7 @@
 	"name": "tutorialmod",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"ThatSmartGuy21"
+		"Myriantics"
 	],
 	"contact": {
 		"homepage": "https://reddit.com/r/feedthememes",
@@ -16,13 +16,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "net.smartguy.tutorialmod.TutorialMod"
+          "net.myriantics.tutorialmod.TutorialMod"
 		],
 		"client": [
-			"net.smartguy.tutorialmod.TutorialModClient"
+			"net.myriantics.tutorialmod.TutorialModClient"
 		],
 		"fabric-datagen": [
-			"net.smartguy.tutorialmod.TutorialModDataGenerator"
+			"net.myriantics.tutorialmod.TutorialModDataGenerator"
 		]
 	},
 	"mixins": [

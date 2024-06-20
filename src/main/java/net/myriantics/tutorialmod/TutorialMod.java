@@ -1,4 +1,4 @@
-package net.smartguy.tutorialmod;
+package net.myriantics.tutorialmod;
 
 import net.fabricmc.api.ModInitializer;
 
