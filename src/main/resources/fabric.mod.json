@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "tutorialmod",
+	"id": "impenduits",
 	"version": "${version}",
-	"name": "tutorialmod",
+	"name": "impenduits",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Myriantics"
@@ -12,21 +12,21 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "MIT",
-	"icon": "assets/tutorialmod/icon.png",
+	"icon": "assets/impenduits/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "net.myriantics.tutorialmod.TutorialMod"
+          "net.myriantics.impenduits.ImpenduitsCommon"
 		],
 		"client": [
-			"net.myriantics.tutorialmod.TutorialModClient"
+			"net.myriantics.impenduits.ImpenduitsClient"
 		],
 		"fabric-datagen": [
-			"net.myriantics.tutorialmod.TutorialModDataGenerator"
+			"net.myriantics.impenduits.ImpenduitsDataGenerator"
 		]
 	},
 	"mixins": [
-		"tutorialmod.mixins.json"
+		"impenduits.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.15.6",
