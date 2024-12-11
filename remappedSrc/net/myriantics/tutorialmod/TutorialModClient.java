@@ -1,4 +1,4 @@
-package net.myriantics.tutorialmod;
+package net.myriantics.impenduits;
 
 import net.fabricmc.api.ClientModInitializer;
 
