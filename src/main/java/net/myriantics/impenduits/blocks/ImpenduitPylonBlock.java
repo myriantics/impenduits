@@ -25,6 +25,7 @@ import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
@@ -44,9 +45,8 @@ public class ImpenduitPylonBlock extends Block {
                 .with(POWERED, false));
     }
 
-    private void spawnForcefield(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    private ArrayList<BlockPos> getAffectedPositions(BlockState state, World world, BlockPos pos) {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
-        ArrayList<BlockPos> activatedImpenduits = new ArrayList<>();
         int boundedFieldLength = MAX_IMPENDUIT_FIELD_SIZE;
 
         Direction neighborCheckingDirection = Direction.from(state.get(AXIS), Direction.AxisDirection.NEGATIVE);
@@ -59,9 +59,6 @@ public class ImpenduitPylonBlock extends Block {
 
             // as soon as you hit an incompatible impenduit, flip checking direction around to the other side
             if (!areNeighboringImpenduitsCompatible(state, targetNeighborState)) {
-
-                ImpenduitsCommon.LOGGER.info("Incompatible Impenduit Found, Switching Direction!");
-
                 // don't switch directions more than once
                 if (switchedDirection) {break;}
 
@@ -72,7 +69,7 @@ public class ImpenduitPylonBlock extends Block {
             }
 
             // if the target pos is a valid impenduit, add it to the activation list
-            activatedImpenduits.add(targetNeighborPos);
+            affectedPositions.add(targetNeighborPos);
 
             // list used to store blockpos that need to be confirmed as supported before committing to the big list
             ArrayList<BlockPos> unconfirmedBlockPosList = new ArrayList<>();
@@ -102,36 +99,35 @@ public class ImpenduitPylonBlock extends Block {
                     ? targetNeighborPos
                     : unconfirmedBlockPosList.get(unconfirmedBlockPosList.size() - 1);
 
-            ImpenduitsCommon.LOGGER.info("FacingDirOffset: " + facingDirOffset);
-            ImpenduitsCommon.LOGGER.info("Bounded Field Length: " + boundedFieldLength);
-
             // check if the last element in the list was a compatible impenduit
             // also checks if impenduits are the same distance away from origin
             if (areOppositeImpenduitsCompatible(state, world.getBlockState(potentialPylonPos))
                     && facingDirOffset == boundedFieldLength) {
-
-                // if it is compatible, remove impenduit from affected blocks and commit changes
-                activatedImpenduits.add(potentialPylonPos);
-                // remove impenduits from uncommitted block list
-                unconfirmedBlockPosList.remove(potentialPylonPos);
-                unconfirmedBlockPosList.remove(targetNeighborPos);
-                // add remaining uncommitted blockpos to affected positions
+                // add uncommitted blockpos to affected positions
                 affectedPositions.addAll(unconfirmedBlockPosList);
             } else {
                 break;
             }
         }
 
-        ImpenduitsCommon.LOGGER.info("Affected Blocks Count: " + affectedPositions.size());
+        return affectedPositions;
+    }
 
-        for (BlockPos affectedPos : affectedPositions) {
-            world.setBlockState(affectedPos, Blocks.QUARTZ_PILLAR.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
+    private void spawnForcefield(BlockState state, World world, BlockPos pos) {
+        ArrayList<BlockPos> affectedPos = getAffectedPositions(state, world, pos);
+
+        // set impenduits to powered and purge them from list
+        // list is copied so i'm not live editing the list i'm iterating through
+        for (BlockPos impenduitPos : List.copyOf(affectedPos)) {
+            if (world.getBlockState(impenduitPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                affectedPos.remove(impenduitPos);
+                world.setBlockState(impenduitPos, world.getBlockState(pos).with(POWERED, true));
+            }
         }
 
-        ImpenduitsCommon.LOGGER.info("Activated Impenduit Count: " + activatedImpenduits.size());
-
-        for (BlockPos activatedImpenduitPos : activatedImpenduits) {
-            world.setBlockState(activatedImpenduitPos, world.getBlockState(activatedImpenduitPos).with(POWERED, true));
+        // update replaced blocks with quartz pillars oriented on the axis of the facing direction of origin impenduit
+        for (BlockPos replacedPos : affectedPos) {
+            world.setBlockState(replacedPos, Blocks.QUARTZ_PILLAR.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
         }
     }
 
@@ -157,7 +153,7 @@ public class ImpenduitPylonBlock extends Block {
                 && !state.get(POWER_SOURCE_PRESENT)) {
 
             if (!world.isClient()) {
-                spawnForcefield(state, world, pos, player);
+                spawnForcefield(state, world, pos);
                 world.playSound(player, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
                 world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
             }
