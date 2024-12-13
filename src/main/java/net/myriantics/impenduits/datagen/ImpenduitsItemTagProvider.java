@@ -7,6 +7,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,5 +21,8 @@ public class ImpenduitsItemTagProvider extends FabricTagProvider.ItemTagProvider
     protected void configure(RegistryWrapper.WrapperLookup arg) {
         getOrCreateTagBuilder(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE)
                 .add(Items.HEART_OF_THE_SEA);
+
+        getOrCreateTagBuilder(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
+                .forceAddTag(ItemTags.PICKAXES);
     }
 }

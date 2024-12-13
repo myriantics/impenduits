@@ -68,7 +68,7 @@ public class ImpenduitPylonBlock extends Block {
                 continue;
             }
 
-            // if the target pos is a valid impenduit, add it to the activation list
+            // if the currently selected axis offset pos is a valid impenduit, add it to the affected pos list
             affectedPositions.add(targetNeighborPos);
 
             // list used to store blockpos that need to be confirmed as supported before committing to the big list
@@ -103,6 +103,7 @@ public class ImpenduitPylonBlock extends Block {
             // also checks if impenduits are the same distance away from origin
             if (areOppositeImpenduitsCompatible(state, world.getBlockState(potentialPylonPos))
                     && facingDirOffset == boundedFieldLength) {
+
                 // add uncommitted blockpos to affected positions
                 affectedPositions.addAll(unconfirmedBlockPosList);
             } else {
@@ -113,22 +114,48 @@ public class ImpenduitPylonBlock extends Block {
         return affectedPositions;
     }
 
-    private void spawnForcefield(BlockState state, World world, BlockPos pos) {
-        ArrayList<BlockPos> affectedPos = getAffectedPositions(state, world, pos);
+    private boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
+        ArrayList<BlockPos> affectedPositions = getAffectedPositions(state, world, pos);
 
-        // set impenduits to powered and purge them from list
-        // list is copied so i'm not live editing the list i'm iterating through
-        for (BlockPos impenduitPos : List.copyOf(affectedPos)) {
-            if (world.getBlockState(impenduitPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-                affectedPos.remove(impenduitPos);
-                world.setBlockState(impenduitPos, world.getBlockState(pos).with(POWERED, true));
+        ImpenduitsCommon.LOGGER.info("Affected Positions List Length: " + affectedPositions.size());
+
+        boolean hasSpawnedForcefield = false;
+
+        // update all blocks in the list accordingly
+        for (BlockPos updatedPos : affectedPositions) {
+            BlockState updatedState = world.getBlockState(updatedPos);
+
+            // filter out impenduit pylons so that they aren't turned to impenduit fields
+            // the only blocks that will be in this list are the pylons and replaceable blocks, so this is a fine assumption to make.
+            if (updatedState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                // update impenduit state to reflect it being powered
+                world.setBlockState(updatedPos, updatedState
+                        // only set it to powered if there is more than one element!
+                        // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
+                        .with(POWERED, affectedPositions.size() > 1)
+                        // update power source state if you need to, but don't overwrite it if it's already present
+                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)));
+            } else {
+                // an impenduit field block was spawned, so update this to true to signify that an action was completed.
+                hasSpawnedForcefield = true;
+
+                // update replaced blocks with quartz pillars oriented on the axis of the facing direction of origin impenduit
+                world.setBlockState(updatedPos, Blocks.QUARTZ_PILLAR.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
             }
         }
 
-        // update replaced blocks with quartz pillars oriented on the axis of the facing direction of origin impenduit
-        for (BlockPos replacedPos : affectedPos) {
-            world.setBlockState(replacedPos, Blocks.QUARTZ_PILLAR.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
+        // if actions were actually performed, it was a success! return true
+        return hasSpawnedForcefield;
+    }
+
+    private int checkValidity(BlockState state, World world, BlockPos pos) {
+        int powerSources = 0;
+        for (BlockPos affectedPos : getAffectedPositions(state, world, pos)) {
+            if (world.getBlockState(affectedPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWER_SOURCE_PRESENT)) {
+                powerSources++;
+            }
         }
+        return powerSources;
     }
 
     private boolean areOppositeImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
@@ -153,18 +180,22 @@ public class ImpenduitPylonBlock extends Block {
                 && !state.get(POWER_SOURCE_PRESENT)) {
 
             if (!world.isClient()) {
-                spawnForcefield(state, world, pos);
+                spawnForcefield(state.cycle(POWER_SOURCE_PRESENT), world, pos);
                 world.playSound(player, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
-                world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
+                //world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
             }
             return ActionResult.SUCCESS;
-        } else if (handStack.isIn(ItemTags.PICKAXES)
+        } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 world.playSound(player, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
                 world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
             }
             return ActionResult.SUCCESS;
+        }
+
+        if (world.isClient) {
+            ImpenduitsCommon.LOGGER.info("Power Sources in Field: " + checkValidity(state, world, pos));
         }
 
         return super.onUse(state, world, pos, player, hand, hit);

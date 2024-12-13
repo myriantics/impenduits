@@ -10,4 +10,7 @@ import net.myriantics.impenduits.ImpenduitsCommon;
 public class ImpenduitsTags {
     public static final TagKey<Item> IMPENDUIT_PYLON_POWER_SOURCE =
             TagKey.of(RegistryKeys.ITEM, ImpenduitsCommon.locate("impenduit_pylon_power_source"));
+
+    public static final TagKey<Item> IMPENDUIT_PYLON_POWER_SOURCE_REMOVER =
+            TagKey.of(RegistryKeys.ITEM, ImpenduitsCommon.locate("impenduit_pylon_power_source_remover"));
 }
