@@ -3,6 +3,7 @@ package net.myriantics.impenduits;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.myriantics.impenduits.datagen.ImpenduitsItemTagProvider;
+import net.myriantics.impenduits.datagen.ImpenduitsModelProvider;
 
 public class ImpenduitsDataGenerator implements DataGeneratorEntrypoint {
 	@Override
@@ -10,5 +11,6 @@ public class ImpenduitsDataGenerator implements DataGeneratorEntrypoint {
 		FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 
 		pack.addProvider(ImpenduitsItemTagProvider::new);
+		pack.addProvider(ImpenduitsModelProvider::new);
 	}
 }
