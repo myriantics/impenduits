@@ -23,12 +23,16 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
     private void registerImpenduitPylonBlock(BlockStateModelGenerator generator) {
         BlockStateVariant singleton_powered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_powered_core"));
         BlockStateVariant singleton_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
-        BlockStateVariant parallel_powered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_core"));
-        BlockStateVariant parallel_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_core"));
         BlockStateVariant singleton_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
         BlockStateVariant singleton_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
-        BlockStateVariant parallel_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_no_core"));
-        BlockStateVariant parallel_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_no_core"));
+        BlockStateVariant parallel_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_no_core_z"));
+        BlockStateVariant parallel_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_no_core_z"));
+        BlockStateVariant parallel_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_core_z"));
+        BlockStateVariant parallel_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_core_z"));
+        BlockStateVariant parallel_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_no_core_x"));
+        BlockStateVariant parallel_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_no_core_x"));
+        BlockStateVariant parallel_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_core_x"));
+        BlockStateVariant parallel_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_core_x"));
 
         generator.registerParentedItemModel(ImpenduitsCommon.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
 
@@ -47,7 +51,7 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                             .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_no_core))
                             .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_core));
                 } else {
-                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_unpowered_no_core))
+                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldR))
                             .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_unpowered_core))
                             .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_powered_no_core))
                             .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_powered_core));
@@ -99,19 +103,19 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
             }
             case NORTH -> {
                 return base.put(VariantSettings.X, VariantSettings.Rotation.R90)
-                        .put(VariantSettings.Y,
+                        /*.put(VariantSettings.Y,
                         shouldRotate
                                 ? VariantSettings.Rotation.R90
                                 : VariantSettings.Rotation.R0
-                );
+                )*/;
             }
             case SOUTH -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R270)
+                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90).put(VariantSettings.X, VariantSettings.Rotation.R90)/*
                         .put(VariantSettings.Y,
                         shouldRotate
-                                ? VariantSettings.Rotation.R90
+                                ? VariantSettings.Rotation.R180
                                 : VariantSettings.Rotation.R0
-                );
+                )*/;
             }
             case EAST -> {
                 return base.put(VariantSettings.X, VariantSettings.Rotation.R90)
@@ -121,6 +125,7 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                                         : VariantSettings.Rotation.R90
                         );
             }
+            // GOOD
             case WEST -> {
                 return base.put(VariantSettings.X, VariantSettings.Rotation.R270)
                         .put(VariantSettings.Y,
@@ -146,10 +151,10 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                 return !axis.equals(Direction.Axis.Z);
             }
             case NORTH, SOUTH -> {
-                return !axis.equals(Direction.Axis.X);
+                return !axis.equals(Direction.Axis.Y);
             }
             case WEST, EAST -> {
-                return !axis.equals(Direction.Axis.Y);
+                return !axis.equals(Direction.Axis.X);
             }
         }
 
