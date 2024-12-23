@@ -51,10 +51,11 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                             .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_no_core))
                             .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_core));
                 } else {
-                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldR))
-                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_unpowered_core))
-                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_powered_no_core))
-                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), parallel_powered_core));
+                    boolean shouldRotate = shouldRotate(facing, axis);
+                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_unpowered_no_core_z : parallel_unpowered_no_core_x))
+                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_unpowered_core_z : parallel_unpowered_core_x))
+                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_powered_no_core_z : parallel_powered_no_core_x))
+                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_powered_core_z : parallel_powered_core_x));
                 }
             }
         }
@@ -79,60 +80,27 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
 
     private static BlockStateVariant impenduitFromOrientation(Direction facing, Direction.Axis axis) {
 
-        boolean shouldRotate = shouldRotate(facing, axis);
-
         BlockStateVariant base = BlockStateVariant.create();
 
         switch(facing) {
             case UP -> {
-                return base
-                        .put(VariantSettings.Y,
-                                shouldRotate
-                                        ? VariantSettings.Rotation.R90
-                                        : VariantSettings.Rotation.R0
-                        );
-
+                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90);
             }
             case DOWN -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R180)
-                        .put(VariantSettings.Y,
-                                shouldRotate
-                                        ? VariantSettings.Rotation.R90
-                                        : VariantSettings.Rotation.R0
-                        );
+                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90).put(VariantSettings.X, VariantSettings.Rotation.R180);
             }
             case NORTH -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R90)
-                        /*.put(VariantSettings.Y,
-                        shouldRotate
-                                ? VariantSettings.Rotation.R90
-                                : VariantSettings.Rotation.R0
-                )*/;
+                return base.put(VariantSettings.X, VariantSettings.Rotation.R90);
             }
             case SOUTH -> {
-                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90).put(VariantSettings.X, VariantSettings.Rotation.R90)/*
-                        .put(VariantSettings.Y,
-                        shouldRotate
-                                ? VariantSettings.Rotation.R180
-                                : VariantSettings.Rotation.R0
-                )*/;
+                return base.put(VariantSettings.X, VariantSettings.Rotation.R270);
+
             }
             case EAST -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R90)
-                        .put(VariantSettings.Y,
-                                shouldRotate
-                                        ? VariantSettings.Rotation.R180
-                                        : VariantSettings.Rotation.R90
-                        );
+                return base.put(VariantSettings.X, VariantSettings.Rotation.R90).put(VariantSettings.Y, VariantSettings.Rotation.R90);
             }
-            // GOOD
             case WEST -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R270)
-                        .put(VariantSettings.Y,
-                                shouldRotate
-                                        ? VariantSettings.Rotation.R180
-                                        : VariantSettings.Rotation.R90
-                        );
+                return base.put(VariantSettings.X, VariantSettings.Rotation.R90).put(VariantSettings.Y, VariantSettings.Rotation.R270);
             }
             default -> {
                 return base;
@@ -151,10 +119,10 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                 return !axis.equals(Direction.Axis.Z);
             }
             case NORTH, SOUTH -> {
-                return !axis.equals(Direction.Axis.Y);
+                return axis.equals(Direction.Axis.Y);
             }
             case WEST, EAST -> {
-                return !axis.equals(Direction.Axis.X);
+                return !axis.equals(Direction.Axis.Z);
             }
         }
 
