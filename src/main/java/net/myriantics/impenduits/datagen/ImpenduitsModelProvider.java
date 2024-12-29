@@ -18,6 +18,13 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
     @Override
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
         registerImpenduitPylonBlock(blockStateModelGenerator);
+        registerImpenduitFieldBlock(blockStateModelGenerator);
+    }
+
+    private void registerImpenduitFieldBlock(BlockStateModelGenerator generator) {
+        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsCommon.IMPENDUIT_FIELD, ImpenduitsCommon.locate("impenduit_field"));
+
+        generator.blockStateCollector.accept(supplier);
     }
 
     private void registerImpenduitPylonBlock(BlockStateModelGenerator generator) {
