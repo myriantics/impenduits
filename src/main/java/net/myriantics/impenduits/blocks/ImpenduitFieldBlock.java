@@ -2,6 +2,7 @@ package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -71,28 +72,22 @@ public class ImpenduitFieldBlock extends Block {
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ImpenduitsCommon.LOGGER.info("State replaced!");
         super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     @Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos updaterPos, boolean notify) {
 
-        // check for if the source block is a field serves to prevent against updates during field formation fucking with things.
-        if (sourceBlock.equals(ImpenduitsCommon.IMPENDUIT_FIELD)) {
-            Direction updateDirection = getDirectionFromAdjacentBlockPos(pos, updaterPos);
-            Direction.Axis fieldAxis = state.get(AXIS);
+        Direction updateDirection = getDirectionFromAdjacentBlockPos(pos, updaterPos);
+        Direction.Axis fieldAxis = state.get(AXIS);
 
-            // only try to validate the field if the update was on the axis of the field
-            if (updateDirection != null && fieldAxis.test(updateDirection)) {
-                ImpenduitsCommon.LOGGER.info("Source Block: " + sourceBlock.getName());
+        // only try to validate the field if the update was on the axis of the field
+        if (updateDirection != null && fieldAxis.test(updateDirection)) {
 
-                // we invert the update direction here because if we don't they'll criss-cross in the middle.
-                validateColumn(world, pos, updateDirection.getOpposite());
-            }
+            // we invert the update direction here because if we don't they'll criss-cross in the middle.
+            validateColumn(world, pos, updateDirection.getOpposite());
         }
 
-        ImpenduitsCommon.LOGGER.info("Direction: " + getDirectionFromAdjacentBlockPos(pos, updaterPos));
         super.neighborUpdate(state, world, pos, sourceBlock, updaterPos, notify);
     }
 
@@ -100,19 +95,18 @@ public class ImpenduitFieldBlock extends Block {
         @Nullable ArrayList<BlockPos> columnPositions = getFieldColumnFromDirection(world, pos, checkingDirection);
 
         if (columnPositions != null) {
-
             // pylon or other interruption is last element in list
             BlockPos pylonPos = columnPositions.get(columnPositions.size() - 1);
 
             for (BlockPos fieldPos : columnPositions) {
                 if (world.getBlockState(fieldPos).isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
-                    world.breakBlock(fieldPos, false);
+                    world.setBlockState(fieldPos, Blocks.AIR.getDefaultState());
                 }
             }
 
             // let pylon know shits goin down
             if (world.getBlockState(pylonPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-                ImpenduitPylonBlock.validate(world, pos, columnPositions);
+                ImpenduitPylonBlock.deactivatePylonRow(world, pylonPos);
             }
         }
     }

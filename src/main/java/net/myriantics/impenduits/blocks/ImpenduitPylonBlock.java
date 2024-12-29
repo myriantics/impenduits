@@ -2,6 +2,7 @@ package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -23,6 +24,7 @@ import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
@@ -42,31 +44,12 @@ public class ImpenduitPylonBlock extends Block {
                 .with(POWERED, false));
     }
 
-    private static ArrayList<BlockPos> getAffectedPositions(BlockState state, World world, BlockPos pos) {
-        ArrayList<BlockPos> affectedPositions = new ArrayList<>();
+    private static ArrayList<BlockPos> getAffectedPositions(BlockState state, World world, BlockPos originPos) {
+        ArrayList<BlockPos> affectedPositions = getPylonRowPositions(world, originPos);
         int boundedFieldLength = MAX_IMPENDUIT_FIELD_SIZE;
 
-        Direction neighborCheckingDirection = Direction.from(state.get(AXIS), Direction.AxisDirection.NEGATIVE);
-
-        boolean switchedDirection = false;
-
-        for (int axisDirOffset = 0; axisDirOffset < MAX_IMPENDUIT_FIELD_SIZE; axisDirOffset++) {
-            BlockPos targetNeighborPos = pos.offset(neighborCheckingDirection, axisDirOffset);
-            BlockState targetNeighborState = world.getBlockState(targetNeighborPos);
-
-            // as soon as you hit an incompatible impenduit, flip checking direction around to the other side
-            if (!areNeighboringImpenduitsCompatible(state, targetNeighborState)) {
-                // don't switch directions more than once
-                if (switchedDirection) {break;}
-
-                switchedDirection = true;
-                neighborCheckingDirection = neighborCheckingDirection.getOpposite();
-                pos = targetNeighborPos;
-                continue;
-            }
-
-            // if the currently selected axis offset pos is a valid impenduit, add it to the affected pos list
-            affectedPositions.add(targetNeighborPos);
+        // copy list so that we're not iterating through the live updated list
+        for (BlockPos targetNeighborPos : List.copyOf(affectedPositions)) {
 
             // list used to store blockpos that need to be confirmed as supported before committing to the big list
             ArrayList<BlockPos> unconfirmedBlockPosList = new ArrayList<>();
@@ -81,9 +64,9 @@ public class ImpenduitPylonBlock extends Block {
                 unconfirmedBlockPosList.add(targetPos);
 
                 // if impenduits can't replace target state, end off the loop
-                if (!targetState.isReplaceable()) {
+                if (!targetState.isReplaceable() || targetState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
                     // cap off impenduit checking length at that of the origin, so that you dont get uneven bs
-                    if (axisDirOffset == 0) {
+                    if (targetNeighborPos.equals(originPos)) {
                         boundedFieldLength = facingDirOffset;
                     }
 
@@ -103,12 +86,60 @@ public class ImpenduitPylonBlock extends Block {
 
                 // add uncommitted blockpos to affected positions
                 affectedPositions.addAll(unconfirmedBlockPosList);
+
+                // if the currently selected axis offset pos is a valid impenduit, add it to the affected pos list
+                affectedPositions.add(targetNeighborPos);
             } else {
                 break;
             }
         }
 
         return affectedPositions;
+    }
+
+    public static void deactivatePylonRow(World world, BlockPos originPos) {
+
+        // iterate through the row of pylons and unpower each one
+        // the fields will deactivate themselves due to the block update
+        for (BlockPos neighborPos : getPylonRowPositions(world, originPos)) {
+            world.setBlockState(neighborPos, world.getBlockState(neighborPos).with(POWERED, false));
+        }
+    }
+
+    private static ArrayList<BlockPos> getPylonRowPositions(World world, BlockPos originPos) {
+        ArrayList<BlockPos> neighboringPylonList = new ArrayList<>();
+
+        BlockState originState = world.getBlockState(originPos);
+        if (originState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+
+            Direction.Axis originAxis = originState.get(AXIS);
+            Direction checkingDirection = Direction.from(originAxis, Direction.AxisDirection.NEGATIVE);
+
+            boolean flipped = false;
+
+            for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE; neighborOffset++) {
+                BlockPos targetNeighborPos = originPos.offset(checkingDirection, neighborOffset);
+                BlockState targetNeighborState = world.getBlockState(targetNeighborPos);
+
+                // as soon as you hit an incompatible impenduit, flip checking direction around to the other side
+                if (!areNeighboringPylonsCompatible(originState, targetNeighborState)) {
+                    // don't switch directions more than once
+                    if (flipped) {
+                        break;
+                    }
+
+                    flipped = true;
+                    checkingDirection = checkingDirection.getOpposite();
+                    originPos = targetNeighborPos;
+                    continue;
+                }
+
+                // add pylon to list if it passes checks
+                neighboringPylonList.add(targetNeighborPos);
+            }
+        }
+
+        return neighboringPylonList;
     }
 
     private boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
@@ -126,39 +157,27 @@ public class ImpenduitPylonBlock extends Block {
             // the only blocks that will be in this list are the pylons and replaceable blocks, so this is a fine assumption to make.
             if (updatedState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
                 // update impenduit state to reflect it being powered
+
                 world.setBlockState(updatedPos, updatedState
                         // only set it to powered if there is more than one element!
                         // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
                         .with(POWERED, affectedPositions.size() > 1)
                         // update power source state if you need to, but don't overwrite it if it's already present
-                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)));
+                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
+                        Block.NOTIFY_LISTENERS);
             } else {
                 // an impenduit field block was spawned, so update this to true to signify that an action was completed.
                 hasSpawnedForcefield = true;
 
-                // update replaced blocks with quartz pillars oriented on the axis of the facing direction of origin impenduit
-                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
+                // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
+                // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
+                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis())
+                        , Block.NOTIFY_LISTENERS);
             }
         }
 
         // if actions were actually performed, it was a success! return true
         return hasSpawnedForcefield;
-    }
-
-    public static void validate(World world, BlockPos pos, @Nullable ArrayList<BlockPos> alertingColumnPositions) {
-        // if the origin point isn't a pylon, feck off
-        if (!world.getBlockState(pos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-            return;
-        }
-
-        BlockState originState = world.getBlockState(pos);
-
-        ArrayList<BlockPos> affectedPositions = getAffectedPositions(originState, world, pos);
-
-        if (alertingColumnPositions != null) {
-            affectedPositions.addAll(alertingColumnPositions);
-        }
-
     }
 
     private static boolean areParallelImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
@@ -167,7 +186,7 @@ public class ImpenduitPylonBlock extends Block {
                 && sourceImpenduit.get(FACING).equals(targetImpenduit.get(FACING).getOpposite());
     }
 
-    private static boolean areNeighboringImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
+    private static boolean areNeighboringPylonsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
         return targetImpenduit.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)
                 && sourceImpenduit.get(AXIS).equals(targetImpenduit.get(AXIS))
                 && sourceImpenduit.get(FACING).equals(targetImpenduit.get(FACING));
@@ -193,6 +212,7 @@ public class ImpenduitPylonBlock extends Block {
             if (!world.isClient()) {
                 world.playSound(player, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
                 world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
+                deactivatePylonRow(world, pos);
             }
             return ActionResult.SUCCESS;
         }
