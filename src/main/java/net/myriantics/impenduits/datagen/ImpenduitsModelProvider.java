@@ -115,14 +115,11 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
 
         // model defaults to north axis so this says that it shouldnt rotate if its already aligned
         switch (facing) {
-            case DOWN, UP -> {
+            case DOWN, UP, WEST, EAST -> {
                 return !axis.equals(Direction.Axis.Z);
             }
             case NORTH, SOUTH -> {
                 return axis.equals(Direction.Axis.Y);
-            }
-            case WEST, EAST -> {
-                return !axis.equals(Direction.Axis.Z);
             }
         }
 

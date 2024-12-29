@@ -140,7 +140,7 @@ public class ImpenduitPylonBlock extends Block {
                 hasSpawnedForcefield = true;
 
                 // update replaced blocks with quartz pillars oriented on the axis of the facing direction of origin impenduit
-                world.setBlockState(updatedPos, Blocks.QUARTZ_PILLAR.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
+                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()));
             }
         }
 
@@ -226,5 +226,10 @@ public class ImpenduitPylonBlock extends Block {
     @Override
     public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
         return state.get(POWER_SOURCE_PRESENT) ? 15 : 0;
+    }
+
+    // if it's a pylon and it's powered, it's safe to assume that it can support a field
+    public static boolean canSupportField(BlockState state) {
+        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED);
     }
 }
