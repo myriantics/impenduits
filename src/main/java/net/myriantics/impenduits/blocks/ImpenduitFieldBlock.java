@@ -2,15 +2,17 @@ package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -18,6 +20,8 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
@@ -34,16 +38,20 @@ public class ImpenduitFieldBlock extends Block {
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         boolean shouldGetShape = false;
 
-        // only do this on the client - also fixes wack ass crash that happened when player tried to load into world while looking at impenduit field
-        if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().worldRenderer.getChunkBuilder() != null) {
-            PlayerEntity player = MinecraftClient.getInstance().player;
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
-            // the outline only shows up if your head is not in  an impenduit field block
-            shouldGetShape = player != null && !world.getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
-        } else  {
-            ImpenduitsCommon.LOGGER.info("Ruh roh - this shouldn't be called on the server!");
+        // only do this on the client
+        if (player != null) {
+
+            // note to self - blockviews are SHITE
+            try {
+                // the outline only shows up if your head isn't in the targeted block
+                shouldGetShape = !player.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
+            } catch (ArrayIndexOutOfBoundsException fuckingshitexception) {
+                ImpenduitsCommon.LOGGER.warn("Shitass exception tried to trigger. I tried to fix this, but this janky hack should work to cover my bases.");
+            }
+
         }
-
 
         return shouldGetShape ? super.getOutlineShape(state, world, pos, context) : VoxelShapes.empty();
     }
@@ -80,20 +88,33 @@ public class ImpenduitFieldBlock extends Block {
                 ImpenduitsCommon.LOGGER.info("Source Block: " + sourceBlock.getName());
 
                 // we invert the update direction here because if we don't they'll criss-cross in the middle.
-                BlockPos pylonPos = findSupportingPylonFromDirection(world, pos, updateDirection.getOpposite());
-
-                /*if (pylonPos != null) {
-                    boolean blue = updateDirection.getDirection().equals(Direction.AxisDirection.POSITIVE);
-                    BlockState test = blue ? Blocks.CYAN_CONCRETE.getDefaultState() : Blocks.RED_CONCRETE.getDefaultState();
-
-
-                    world.setBlockState(pylonPos, test);
-                }*/
+                validateColumn(world, pos, updateDirection.getOpposite());
             }
         }
 
         ImpenduitsCommon.LOGGER.info("Direction: " + getDirectionFromAdjacentBlockPos(pos, updaterPos));
         super.neighborUpdate(state, world, pos, sourceBlock, updaterPos, notify);
+    }
+
+    public static void validateColumn(World world, BlockPos pos, Direction checkingDirection) {
+        @Nullable ArrayList<BlockPos> columnPositions = getFieldColumnFromDirection(world, pos, checkingDirection);
+
+        if (columnPositions != null) {
+
+            // pylon or other interruption is last element in list
+            BlockPos pylonPos = columnPositions.get(columnPositions.size() - 1);
+
+            for (BlockPos fieldPos : columnPositions) {
+                if (world.getBlockState(fieldPos).isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
+                    world.breakBlock(fieldPos, false);
+                }
+            }
+
+            // let pylon know shits goin down
+            if (world.getBlockState(pylonPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                ImpenduitPylonBlock.validate(world, pos, columnPositions);
+            }
+        }
     }
 
 
@@ -113,17 +134,26 @@ public class ImpenduitFieldBlock extends Block {
         return null;
     }
 
-    private @Nullable BlockPos findSupportingPylonFromDirection(World world, BlockPos fieldPos, Direction lookingDirection) {
+    private static @Nullable ArrayList<BlockPos> getFieldColumnFromDirection(World world, BlockPos fieldPos, Direction lookingDirection) {
+        ArrayList<BlockPos> columnPositions = new ArrayList<>();
+
         for (int i = 0; i < ImpenduitPylonBlock.MAX_IMPENDUIT_FIELD_SIZE; i++) {
             BlockPos targetPos = fieldPos.offset(lookingDirection, i);
             BlockState targetState = world.getBlockState(targetPos);
 
-            // if it's another impenduit field, we don't care - only run this code when we've reached the end or an unexpected thing
-            if (!targetState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
-                return ImpenduitPylonBlock.canSupportField(targetState) ? targetPos : null;
+            columnPositions.add(targetPos);
+
+            // break out of the loop once we an unexpected block or incompatible field
+            if (!areFieldsCompatible(world.getBlockState(fieldPos), targetState)) {
+                break;
             }
         }
 
-        return null;
+        return columnPositions;
+    }
+
+    private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
+        // field blockstates have to be identical to be compatible - they also are double checked to be field blocks
+        return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.equals(otherField);
     }
 }

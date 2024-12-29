@@ -2,11 +2,9 @@ package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -25,7 +23,6 @@ import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
@@ -45,7 +42,7 @@ public class ImpenduitPylonBlock extends Block {
                 .with(POWERED, false));
     }
 
-    private ArrayList<BlockPos> getAffectedPositions(BlockState state, World world, BlockPos pos) {
+    private static ArrayList<BlockPos> getAffectedPositions(BlockState state, World world, BlockPos pos) {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
         int boundedFieldLength = MAX_IMPENDUIT_FIELD_SIZE;
 
@@ -101,7 +98,7 @@ public class ImpenduitPylonBlock extends Block {
 
             // check if the last element in the list was a compatible impenduit
             // also checks if impenduits are the same distance away from origin
-            if (areOppositeImpenduitsCompatible(state, world.getBlockState(potentialPylonPos))
+            if (areParallelImpenduitsCompatible(state, world.getBlockState(potentialPylonPos))
                     && facingDirOffset == boundedFieldLength) {
 
                 // add uncommitted blockpos to affected positions
@@ -148,23 +145,29 @@ public class ImpenduitPylonBlock extends Block {
         return hasSpawnedForcefield;
     }
 
-    private int checkValidity(BlockState state, World world, BlockPos pos) {
-        int powerSources = 0;
-        for (BlockPos affectedPos : getAffectedPositions(state, world, pos)) {
-            if (world.getBlockState(affectedPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWER_SOURCE_PRESENT)) {
-                powerSources++;
-            }
+    public static void validate(World world, BlockPos pos, @Nullable ArrayList<BlockPos> alertingColumnPositions) {
+        // if the origin point isn't a pylon, feck off
+        if (!world.getBlockState(pos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+            return;
         }
-        return powerSources;
+
+        BlockState originState = world.getBlockState(pos);
+
+        ArrayList<BlockPos> affectedPositions = getAffectedPositions(originState, world, pos);
+
+        if (alertingColumnPositions != null) {
+            affectedPositions.addAll(alertingColumnPositions);
+        }
+
     }
 
-    private boolean areOppositeImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
+    private static boolean areParallelImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
         return targetImpenduit.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)
                 && sourceImpenduit.get(AXIS).equals(targetImpenduit.get(AXIS))
                 && sourceImpenduit.get(FACING).equals(targetImpenduit.get(FACING).getOpposite());
     }
 
-    private boolean areNeighboringImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
+    private static boolean areNeighboringImpenduitsCompatible(BlockState sourceImpenduit, BlockState targetImpenduit) {
         return targetImpenduit.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)
                 && sourceImpenduit.get(AXIS).equals(targetImpenduit.get(AXIS))
                 && sourceImpenduit.get(FACING).equals(targetImpenduit.get(FACING));
@@ -192,10 +195,6 @@ public class ImpenduitPylonBlock extends Block {
                 world.setBlockState(pos, state.cycle(POWER_SOURCE_PRESENT));
             }
             return ActionResult.SUCCESS;
-        }
-
-        if (world.isClient) {
-            ImpenduitsCommon.LOGGER.info("Power Sources in Field: " + checkValidity(state, world, pos));
         }
 
         return super.onUse(state, world, pos, player, hand, hit);
@@ -228,8 +227,8 @@ public class ImpenduitPylonBlock extends Block {
         return state.get(POWER_SOURCE_PRESENT) ? 15 : 0;
     }
 
-    // if it's a pylon and it's powered, it's safe to assume that it can support a field
-    public static boolean canSupportField(BlockState state) {
-        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED);
+    // if it's a pylon, it's powered, and it's facing the right way, it's safe to assume that it can support a field
+    public static boolean canSupportField(BlockState state, Direction lookingDirection) {
+        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED) && state.get(FACING).equals(lookingDirection.getOpposite());
     }
 }
