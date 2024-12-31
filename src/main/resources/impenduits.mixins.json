@@ -1,11 +1,14 @@
 {
-	"required": true,
-	"package": "net.myriantics.impenduits.mixin",
-	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-      "ConduitBlockEntityMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "net.myriantics.impenduits.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ConduitBlockEntityMixin",
+    "EntityMixin",
+    "FlowableFluidMixin",
+    "PistonBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

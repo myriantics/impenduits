@@ -1,25 +1,26 @@
 package net.myriantics.impenduits.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -58,6 +59,30 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (context instanceof EntityShapeContext entityShapeContext
+                && entityShapeContext.getEntity() instanceof LivingEntity livingEntity) {
+
+            VoxelShape shape = VoxelShapes.fullCube();
+
+            // entities can walk on impenduit pylons if they have frost walker
+            if (EnchantmentHelper.hasFrostWalker(livingEntity)
+                    && entityShapeContext.isAbove(shape, pos, false)
+                    // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
+                    && !livingEntity.isTouchingWater()) {
+                return shape;
+            }
+        }
+
+        return super.getCollisionShape(state, world, pos, context);
+    }
+
+    @Override
+    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+        return false;
+    }
+
+    @Override
     public boolean canMobSpawnInside(BlockState state) {
         return false;
     }
@@ -73,6 +98,21 @@ public class ImpenduitFieldBlock extends Block {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         super.onStateReplaced(state, world, pos, newState, moved);
+    }
+
+    public static boolean canFieldReplaceBlock(World world, BlockPos pos, BlockState state) {
+        return (
+                // if the block is already replaceable, you're good
+                state.isReplaceable()
+                        // if a block is specifically tagged as being replaceable, then go ahead.
+                        || state.isIn(ImpenduitsTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_ALLOWLIST)
+                        // if the block isn't a full block and is an instabreak, impenduits can replace it. this drops the block's loot!
+                        || (state.getHardness(null, null) == 0f && !state.isFullCube(world, pos))
+        )
+                // fields can't replace other fields
+                && !state.isOf(ImpenduitsCommon.IMPENDUIT_FIELD)
+                // denylist overrides any other conditions
+                && !state.isIn(ImpenduitsTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_DENYLIST);
     }
 
     @Override

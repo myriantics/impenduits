@@ -28,17 +28,21 @@ public class ImpenduitsDispenserBehaviors {
                 this.setSuccess(true);
 
                 // if it's an impenduit without the power core, run this
-                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && !targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                    ImpenduitPylonBlock.insertPowerCore(world, targetPos);
-                    stack.decrement(1);
+                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+
+                    if (!targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
+                        ImpenduitPylonBlock.insertPowerCore(world, targetPos);
+                        stack.decrement(1);
+                    } else {
+                        this.setSuccess(false);
+                    }
 
                     return stack;
                 } else {
-                    this.setSuccess(false);
+                    return super.dispenseSilently(pointer, stack);
                 }
 
 
-                return super.dispenseSilently(pointer, stack);
             }
         });
 
@@ -52,17 +56,20 @@ public class ImpenduitsDispenserBehaviors {
 
                 this.setSuccess(true);
 
-
-                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                    ImpenduitPylonBlock.removePowerCore(world, targetPos);
-                    stack.damage(1, world.getRandom(), null);
+                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                    if (targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
+                        ImpenduitPylonBlock.removePowerCore(world, targetPos);
+                        stack.damage(1, world.getRandom(), null);
+                    } else {
+                        this.setSuccess(false);
+                    }
 
                     return stack;
                 } else {
-                    this.setSuccess(false);
+
+                    return super.dispenseSilently(pointer, stack);
                 }
 
-                return super.dispenseSilently(pointer, stack);
             }
         };
 

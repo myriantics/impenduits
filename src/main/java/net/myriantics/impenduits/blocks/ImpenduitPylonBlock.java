@@ -2,6 +2,7 @@ package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
@@ -64,7 +65,7 @@ public class ImpenduitPylonBlock extends Block {
                 unconfirmedBlockPosList.add(targetPos);
 
                 // if impenduits can't replace target state, end off the loop
-                if (!targetState.isReplaceable() || targetState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
+                if (!ImpenduitFieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
                     // cap off impenduit checking length at that of the origin, so that you dont get uneven bs
                     if (targetNeighborPos.equals(originPos)) {
                         boundedFieldLength = facingDirOffset;
@@ -98,10 +99,15 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     public static void deactivatePylonRow(World world, BlockPos originPos) {
-        // iterate through the row of pylons and unpower each one
-        // the fields will deactivate themselves due to the block update
-        for (BlockPos neighborPos : getPylonRowPositions(world, originPos)) {
-            world.setBlockState(neighborPos, world.getBlockState(neighborPos).with(POWERED, false));
+        BlockState originState = world.getBlockState(originPos);
+
+        // only check for pylons to disable if the pylon itself is powered - prevents recursive pointless checking
+        if (originState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && originState.get(POWERED)) {
+            // iterate through the row of pylons and unpower each one
+            // the fields will deactivate themselves due to the block update
+            for (BlockPos neighborPos : getPylonRowPositions(world, originPos)) {
+                world.setBlockState(neighborPos, world.getBlockState(neighborPos).with(POWERED, false));
+            }
         }
     }
 
@@ -170,6 +176,7 @@ public class ImpenduitPylonBlock extends Block {
 
                 // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
                 // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
+                Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
                 world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()),
                         Block.NOTIFY_LISTENERS);
             }
@@ -233,6 +240,19 @@ public class ImpenduitPylonBlock extends Block {
         deactivatePylonRow(world, pos);
     }
 
+    @Override
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+        BlockPos facingOffsetPos = pos.offset(state.get(FACING), 1);
+
+        // turn pylon off if it shouldn't be on
+        if (facingOffsetPos == sourcePos
+                && state.get(POWERED)
+                && !world.getBlockState(sourcePos).isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
+            world.setBlockState(pos, state.with(POWERED, false));
+        }
+        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
+    }
+
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
@@ -252,8 +272,13 @@ public class ImpenduitPylonBlock extends Block {
 
     @Override
     public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        ImpenduitsCommon.LOGGER.info("Comparator Output Polled!");
         return state.get(POWER_SOURCE_PRESENT) ? 15 : 0;
+    }
+
+    // called in PistonBlockMixin
+    public static PistonBehavior getPistonBehaviorFromState(BlockState pylonState) {
+        // you're only allowed to push it if it's not fueled
+        return pylonState.get(POWER_SOURCE_PRESENT) ? PistonBehavior.BLOCK : PistonBehavior.NORMAL;
     }
 
     @Override
