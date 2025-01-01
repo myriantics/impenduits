@@ -27,18 +27,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
-    public static final BooleanProperty FORMING = BooleanProperty.of("forming");
-
 
     public ImpenduitFieldBlock(Settings settings) {
         super(settings);
 
         setDefaultState(this.getStateManager().getDefaultState()
-                .with(AXIS, Direction.Axis.Y)
-                .with(FORMING, false));
+                .with(AXIS, Direction.Axis.Y));
     }
 
     @Override
@@ -83,12 +81,6 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-        world.setBlockState(pos, state.with(FORMING, false));
-        super.onBlockAdded(state, world, pos, oldState, notify);
-    }
-
-    @Override
     public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
         return false;
     }
@@ -122,76 +114,26 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
+    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
+        return ItemStack.EMPTY;
     }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        Direction updateDirection = getDirectionFromAdjacentBlockPos(pos, neighborPos);
-        Direction.Axis fieldAxis = state.get(AXIS);
+        Direction.Axis updatedFieldAxis = state.get(AXIS);
 
-        if (updateDirection != null && fieldAxis.test(updateDirection)) {
-            return canStateSupportField(state, neighborState) ? state : Blocks.AIR.getDefaultState();
+        // if the update is inline with the field column, run this
+        if (!world.isClient() && direction.getAxis().equals(updatedFieldAxis) && !canStateSupportField(state, neighborState)) {
+            ImpenduitsCommon.LOGGER.info("Neighbor Block: " + neighborState.getBlock().getName());
+            return Blocks.AIR.getDefaultState();
         }
 
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
-    /*@Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos updaterPos, boolean notify) {
-
-        Direction updateDirection = getDirectionFromAdjacentBlockPos(pos, updaterPos);
-        Direction.Axis fieldAxis = state.get(AXIS);
-
-        // only try to validate the field if the update was on the axis of the field
-        if (updateDirection != null && fieldAxis.test(updateDirection)
-                // check if the updated block is supported before validating
-                && !isFieldSupported(world, state, pos)
-                // check if the field is forming before validating - this is to prevent fucky stuff like redstone dust borking the field placement
-                && !state.get(FORMING)
-        ) {
-            validateColumn(world, pos, updateDirection.getOpposite());
-        }
-
-        super.neighborUpdate(state, world, pos, sourceBlock, updaterPos, notify);
-    }*/
-
-    public static void validateColumn(World world, BlockPos pos, Direction checkingDirection) {
-        @Nullable ArrayList<BlockPos> columnPositions = getFieldColumnFromDirection(world, pos, checkingDirection);
-
-        if (columnPositions != null) {
-            // pylon or other interruption is last element in list
-            BlockPos pylonPos = columnPositions.get(columnPositions.size() - 1);
-
-            for (BlockPos fieldPos : columnPositions) {
-                if (world.getBlockState(fieldPos).isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
-                    world.setBlockState(fieldPos, Blocks.AIR.getDefaultState());
-                }
-            }
-
-            // let pylon know shits goin down
-            if (world.getBlockState(pylonPos).isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-                ImpenduitPylonBlock.deactivatePylonRow(world, pylonPos);
-            }
-        }
-    }
-
-
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(AXIS, FORMING);
-    }
-
-    private @Nullable Direction getDirectionFromAdjacentBlockPos(BlockPos source, BlockPos satellite) {
-        for (Direction direction : Direction.values()) {
-            if (source.offset(direction, 1).equals(satellite)) {
-                return direction;
-            }
-        }
-
-        // return null if they're not adjacent
-        return null;
+        builder.add(AXIS);
     }
 
     private static ArrayList<BlockPos> getFieldColumnFromDirection(World world, BlockPos fieldPos, Direction lookingDirection) {
@@ -217,62 +159,7 @@ public class ImpenduitFieldBlock extends Block {
         return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.equals(otherField);
     }
 
-    private static boolean isFieldForming(World world, BlockState fieldState, BlockPos fieldPos) {
-        // protects against expensive for loop polling - as well as making it function as intended
-
-        boolean pylonAPowered = false;
-        boolean pylonBPowered = false;
-
-        ImpenduitsCommon.LOGGER.info("Field Formation Status Polled!");
-
-        Direction checkingDirection = Direction.from(fieldState.get(AXIS), Direction.AxisDirection.NEGATIVE);
-        Direction formationDirection = null;
-
-        for (int i = 0; i < ImpenduitPylonBlock.MAX_IMPENDUIT_FIELD_SIZE; i++) {
-            BlockPos checkedPos = fieldPos.offset(checkingDirection, i);
-            BlockState checkedState = world.getBlockState(checkedPos);
-
-            if (checkedState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && !checkedPos.equals(fieldPos)) {
-                // checks for fields - returns false if it detects them on both sides of the column
-                if (formationDirection == null) {
-                    formationDirection = checkingDirection;
-                } else {
-                    return false;
-                }
-            }
-
-            if (checkedState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-                if (checkedState.get(ImpenduitPylonBlock.POWERED)) {
-                    if (pylonAPowered) {
-                        pylonBPowered = true;
-                        break;
-                    } else {
-                        pylonAPowered = true;
-                        checkingDirection = checkingDirection.getOpposite();
-                        fieldPos = checkedPos;
-                    }
-                } else {
-                    // if we hit an unpowered pylon, gtfo - it's not forming
-                    return false;
-                }
-            }
-        }
-
-        return pylonAPowered && pylonBPowered;
-    }
-
     private static boolean canStateSupportField(BlockState fieldState, BlockState supportState) {
-        return areFieldsCompatible(fieldState, supportState) ||  ImpenduitPylonBlock.canSupportField(supportState, fieldState.get(AXIS));
-    }
-
-    private static boolean isFieldSupported(World world, BlockState fieldState, BlockPos fieldPos) {
-        Direction negative = Direction.from(fieldState.get(AXIS), Direction.AxisDirection.NEGATIVE);
-        Direction positive = Direction.from(fieldState.get(AXIS), Direction.AxisDirection.POSITIVE);
-
-        BlockState adjacentStateA = world.getBlockState(fieldPos.offset(negative, 1));
-        BlockState adjacentStateB = world.getBlockState(fieldPos.offset(positive, 1));
-
-        return (areFieldsCompatible(fieldState, adjacentStateA) || ImpenduitPylonBlock.canSupportField(adjacentStateA, fieldState.get(AXIS)) )
-                && (areFieldsCompatible(fieldState, adjacentStateB) || ImpenduitPylonBlock.canSupportField(adjacentStateB, fieldState.get(AXIS)));
+        return areFieldsCompatible(fieldState, supportState) ||  ImpenduitPylonBlock.canSupportField(supportState, fieldState);
     }
 }

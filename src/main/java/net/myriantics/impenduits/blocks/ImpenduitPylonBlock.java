@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -23,6 +24,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
@@ -121,6 +123,19 @@ public class ImpenduitPylonBlock extends Block {
         return affectedPositions;
     }
 
+    @Override
+    public BlockState getStateForNeighborUpdate(BlockState pylonState, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pylonPos, BlockPos neighborPos) {
+        Direction pylonFacing = pylonState.get(FACING);
+
+        // only run this if the update comes from the pylon's field face
+        if (!world.isClient() && pylonFacing.equals(direction) && !canSupportField(pylonState, neighborState)) {
+            // turn off the entire pylon row, because it's in an invalid state
+            deactivatePylonRow((World) world, pylonPos);
+        }
+
+        return super.getStateForNeighborUpdate(pylonState, direction, neighborState, world, pylonPos, neighborPos);
+    }
+
     public static void deactivatePylonRow(World world, BlockPos originPos) {
         BlockState originState = world.getBlockState(originPos);
 
@@ -205,7 +220,7 @@ public class ImpenduitPylonBlock extends Block {
             // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
             // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
             Block.dropStacks(world.getBlockState(updatedPos2), world, updatedPos2);
-            world.setBlockState(updatedPos2, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()).with(ImpenduitFieldBlock.FORMING, true),
+            world.setBlockState(updatedPos2, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()),
                     Block.NOTIFY_LISTENERS);
         }
 
@@ -268,19 +283,6 @@ public class ImpenduitPylonBlock extends Block {
         deactivatePylonRow(world, pos);
     }
 
-    @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-        BlockPos facingOffsetPos = pos.offset(state.get(FACING), 1);
-
-        // turn pylon off if it shouldn't be on
-        if (facingOffsetPos == sourcePos
-                && state.get(POWERED)
-                && !world.getBlockState(sourcePos).isOf(ImpenduitsCommon.IMPENDUIT_FIELD)) {
-            world.setBlockState(pos, state.with(POWERED, false));
-        }
-        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
-    }
-
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
@@ -315,7 +317,7 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     // if it's a pylon, it's powered, and it's facing the right way, it's safe to assume that it can support a field
-    public static boolean canSupportField(BlockState state, Direction.Axis fieldAxis) {
-        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED) && state.get(FACING).getAxis().equals(fieldAxis);
+    public static boolean canSupportField(BlockState state, BlockState fieldState) {
+        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED) && fieldState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && state.get(FACING).getAxis().equals(fieldState.get(AXIS));
     }
 }
