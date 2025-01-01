@@ -7,6 +7,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -17,6 +18,7 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -26,6 +28,7 @@ import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
@@ -49,8 +52,21 @@ public class ImpenduitPylonBlock extends Block {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
         int boundedFieldLength = MAX_IMPENDUIT_FIELD_SIZE;
 
-        // copy list so that we're not iterating through the live updated list
-        for (BlockPos targetNeighborPos : getPylonRowPositions(world, originPos)) {
+        final ArrayList<BlockPos> pylonRowPositions = getPylonRowPositions(world, originPos);
+        final Direction.Axis pylonAxis = state.get(AXIS);
+
+        boolean obstructed = false;
+
+
+        for (BlockPos targetNeighborPos : pylonRowPositions) {
+
+            // if the forcefield spawning has been interrupted and the current element isn't the first flipped element, skip the current element
+            if (obstructed && !targetNeighborPos.equals(originPos.offset(pylonAxis, 1))) {
+                continue;
+            } else if (targetNeighborPos.equals(originPos.offset(pylonAxis, 1))) {
+                // don't skip any future elements after first flipped element is encountered - that's bad
+                obstructed = false;
+            }
 
             // list used to store blockpos that need to be confirmed as supported before committing to the big list
             ArrayList<BlockPos> unconfirmedBlockPosList = new ArrayList<>();
@@ -91,6 +107,13 @@ public class ImpenduitPylonBlock extends Block {
                 // if the currently selected axis offset pos is a valid impenduit, add it to the affected pos list
                 affectedPositions.add(targetNeighborPos);
             } else {
+                // checks to see if the target pos comes before direction flip
+                // this protects against weird buggy looking field placement
+                if (targetNeighborPos.getComponentAlongAxis(pylonAxis) < originPos.offset(pylonAxis, 1).getComponentAlongAxis(pylonAxis)) {
+                    obstructed = true;
+                    continue;
+                }
+
                 break;
             }
         }
@@ -150,12 +173,10 @@ public class ImpenduitPylonBlock extends Block {
     private static boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
         ArrayList<BlockPos> affectedPositions = getAffectedPositions(state, world, pos);
 
-        ImpenduitsCommon.LOGGER.info("Affected Positions List Length: " + affectedPositions.size());
-
         boolean hasSpawnedForcefield = false;
 
-        // update all blocks in the list accordingly
-        for (BlockPos updatedPos : affectedPositions) {
+        // pylons are placed first so that the fields can know that they're being formed
+        for (BlockPos updatedPos : List.copyOf(affectedPositions)) {
             BlockState updatedState = world.getBlockState(updatedPos);
 
             // filter out impenduit pylons so that they aren't turned to impenduit fields
@@ -164,22 +185,28 @@ public class ImpenduitPylonBlock extends Block {
                 // update impenduit state to reflect it being powered
 
                 world.setBlockState(updatedPos, updatedState
-                        // only set it to powered if there is more than one element!
-                        // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
-                        .with(POWERED, affectedPositions.size() > 1)
-                        // update power source state if you need to, but don't overwrite it if it's already present
-                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
+                                // only set it to powered if there is more than one element!
+                                // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
+                                .with(POWERED, affectedPositions.size() > 1)
+                                // update power source state if you need to, but don't overwrite it if it's already present
+                                .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
                         Block.NOTIFY_LISTENERS);
-            } else {
-                // an impenduit field block was spawned, so update this to true to signify that an action was completed.
-                hasSpawnedForcefield = true;
 
-                // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
-                // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
-                Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
-                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()),
-                        Block.NOTIFY_LISTENERS);
+                // remove pylon positions from list so that next for loop doesn't have to deal with them
+                affectedPositions.remove(updatedPos);
             }
+        }
+
+        // update all blocks in the list accordingly
+        for (BlockPos updatedPos2 : affectedPositions) {
+            // an impenduit field block was spawned, so update this to true to signify that an action was completed.
+            hasSpawnedForcefield = true;
+
+            // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
+            // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
+            Block.dropStacks(world.getBlockState(updatedPos2), world, updatedPos2);
+            world.setBlockState(updatedPos2, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()).with(ImpenduitFieldBlock.FORMING, true),
+                    Block.NOTIFY_LISTENERS);
         }
 
         // if actions were actually performed, it was a success! return true
@@ -237,6 +264,7 @@ public class ImpenduitPylonBlock extends Block {
         world.updateComparators(pos, ImpenduitsCommon.IMPENDUIT_PYLON);
         world.playSound(null, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
         world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, false));
+        ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.HEART_OF_THE_SEA));
         deactivatePylonRow(world, pos);
     }
 
@@ -287,7 +315,7 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     // if it's a pylon, it's powered, and it's facing the right way, it's safe to assume that it can support a field
-    public static boolean canSupportField(BlockState state, Direction lookingDirection) {
-        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED) && state.get(FACING).equals(lookingDirection.getOpposite());
+    public static boolean canSupportField(BlockState state, Direction.Axis fieldAxis) {
+        return state.isOf(ImpenduitsCommon.IMPENDUIT_PYLON) && state.get(POWERED) && state.get(FACING).getAxis().equals(fieldAxis);
     }
 }
