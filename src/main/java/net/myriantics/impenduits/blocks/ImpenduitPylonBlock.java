@@ -277,8 +277,8 @@ public class ImpenduitPylonBlock extends Block {
 
     // called in PistonBlockMixin
     public static PistonBehavior getPistonBehaviorFromState(BlockState pylonState) {
-        // you're only allowed to push it if it's not fueled
-        return pylonState.get(POWER_SOURCE_PRESENT) ? PistonBehavior.BLOCK : PistonBehavior.NORMAL;
+        // you're only allowed to push it if it's not part of an active field
+        return pylonState.get(POWERED) ? PistonBehavior.BLOCK : PistonBehavior.NORMAL;
     }
 
     @Override

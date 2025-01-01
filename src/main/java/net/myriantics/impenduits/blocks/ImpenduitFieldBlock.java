@@ -4,11 +4,9 @@ import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
@@ -95,11 +93,6 @@ public class ImpenduitFieldBlock extends Block {
         return player != null && context.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
     }
 
-    @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
-    }
-
     public static boolean canFieldReplaceBlock(World world, BlockPos pos, BlockState state) {
         return (
                 // if the block is already replaceable, you're good
@@ -122,7 +115,9 @@ public class ImpenduitFieldBlock extends Block {
         Direction.Axis fieldAxis = state.get(AXIS);
 
         // only try to validate the field if the update was on the axis of the field
-        if (updateDirection != null && fieldAxis.test(updateDirection)) {
+        if (updateDirection != null && fieldAxis.test(updateDirection)
+                // check if the updated block is supported before validating
+                && !isFieldSupported(world, state, pos)) {
 
             // we invert the update direction here because if we don't they'll criss-cross in the middle.
             validateColumn(world, pos, updateDirection.getOpposite());
@@ -189,5 +184,16 @@ public class ImpenduitFieldBlock extends Block {
     private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
         // field blockstates have to be identical to be compatible - they also are double checked to be field blocks
         return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.equals(otherField);
+    }
+
+    private static boolean isFieldSupported(World world, BlockState fieldState, BlockPos fieldPos) {
+        Direction negative = Direction.from(fieldState.get(AXIS), Direction.AxisDirection.NEGATIVE);
+        Direction positive = Direction.from(fieldState.get(AXIS), Direction.AxisDirection.POSITIVE);
+
+        BlockState adjacentStateA = world.getBlockState(fieldPos.offset(negative, 1));
+        BlockState adjacentStateB = world.getBlockState(fieldPos.offset(positive, 1));
+
+        return (areFieldsCompatible(fieldState, adjacentStateA) || ImpenduitPylonBlock.canSupportField(adjacentStateA, negative) )
+                && (areFieldsCompatible(fieldState, adjacentStateB) || ImpenduitPylonBlock.canSupportField(adjacentStateB, positive));
     }
 }
