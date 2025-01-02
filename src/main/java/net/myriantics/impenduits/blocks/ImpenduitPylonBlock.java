@@ -188,10 +188,11 @@ public class ImpenduitPylonBlock extends Block {
     private static boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
         ArrayList<BlockPos> affectedPositions = getAffectedPositions(state, world, pos);
 
+        Direction pylonFacing = state.get(FACING);
+
         boolean hasSpawnedForcefield = false;
 
-        // pylons are placed first so that the fields can know that they're being formed
-        for (BlockPos updatedPos : List.copyOf(affectedPositions)) {
+        for (BlockPos updatedPos : affectedPositions) {
             BlockState updatedState = world.getBlockState(updatedPos);
 
             // filter out impenduit pylons so that they aren't turned to impenduit fields
@@ -205,23 +206,22 @@ public class ImpenduitPylonBlock extends Block {
                                 .with(POWERED, affectedPositions.size() > 1)
                                 // update power source state if you need to, but don't overwrite it if it's already present
                                 .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
-                        Block.NOTIFY_LISTENERS);
+                        Block.NOTIFY_LISTENERS | FORCE_STATE);
 
                 // remove pylon positions from list so that next for loop doesn't have to deal with them
                 affectedPositions.remove(updatedPos);
+            } else {
+                // an impenduit field block was spawned, so update this to true to signify that an action was completed.
+                hasSpawnedForcefield = true;
+
+                // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
+                // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
+                Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
+                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, pylonFacing.getAxis()),
+                        Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                // don't update blocks ahead of the current field in the line - this prevents fucky bullshit with stuff like redstone wire
+                world.updateNeighborsExcept(updatedPos, ImpenduitsCommon.IMPENDUIT_PYLON, pylonFacing);
             }
-        }
-
-        // update all blocks in the list accordingly
-        for (BlockPos updatedPos2 : affectedPositions) {
-            // an impenduit field block was spawned, so update this to true to signify that an action was completed.
-            hasSpawnedForcefield = true;
-
-            // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
-            // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
-            Block.dropStacks(world.getBlockState(updatedPos2), world, updatedPos2);
-            world.setBlockState(updatedPos2, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, state.get(FACING).getAxis()),
-                    Block.NOTIFY_LISTENERS);
         }
 
         // if actions were actually performed, it was a success! return true
