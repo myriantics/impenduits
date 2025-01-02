@@ -160,7 +160,7 @@ public class ImpenduitPylonBlock extends Block {
 
             boolean flipped = false;
 
-            for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE; neighborOffset++) {
+            for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE + (flipped ? 1 : 0); neighborOffset++) {
                 BlockPos targetNeighborPos = originPos.offset(checkingDirection, neighborOffset);
                 BlockState targetNeighborState = world.getBlockState(targetNeighborPos);
 
@@ -172,6 +172,7 @@ public class ImpenduitPylonBlock extends Block {
                     }
 
                     flipped = true;
+
                     checkingDirection = checkingDirection.getOpposite();
                     originPos = targetNeighborPos;
                     continue;

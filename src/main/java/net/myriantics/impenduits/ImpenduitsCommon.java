@@ -37,10 +37,10 @@ public class ImpenduitsCommon implements ModInitializer {
 
 		IMPENDUIT_PYLON = Registry.register(Registries.BLOCK,
 				locate("impenduit_pylon"),
-				new ImpenduitPylonBlock(FabricBlockSettings.copyOf(Blocks.BLUE_ICE).solid()));
+				new ImpenduitPylonBlock(FabricBlockSettings.copyOf(Blocks.BLUE_ICE).solid().sounds(BlockSoundGroup.STONE).luminance((state) -> state.get(ImpenduitPylonBlock.POWERED) ? 4 : 0)));
 		IMPENDUIT_FIELD = Registry.register(Registries.BLOCK,
 				locate("impenduit_field"),
-				new ImpenduitFieldBlock(FabricBlockSettings.copyOf(Blocks.GLASS).replaceable().noCollision().dropsNothing().hardness(-1.0f).pistonBehavior(PistonBehavior.BLOCK).sounds(BlockSoundGroup.AMETHYST_BLOCK)));
+				new ImpenduitFieldBlock(FabricBlockSettings.copyOf(Blocks.GLASS).replaceable().noCollision().dropsNothing().hardness(-1.0f).pistonBehavior(PistonBehavior.BLOCK).sounds(BlockSoundGroup.AMETHYST_BLOCK).luminance(8)));
 		IMPENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
 				locate("impenduit_pylon"),
 				new BlockItem(IMPENDUIT_PYLON, new FabricItemSettings()));

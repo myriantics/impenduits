@@ -10,6 +10,9 @@ import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -23,11 +26,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
@@ -124,8 +122,13 @@ public class ImpenduitFieldBlock extends Block {
 
         // if the update is inline with the field column, run this
         if (!world.isClient() && direction.getAxis().equals(updatedFieldAxis) && !canStateSupportField(state, neighborState)) {
-            ImpenduitsCommon.LOGGER.info("Neighbor Block: " + neighborState.getBlock().getName());
-            return Blocks.AIR.getDefaultState();
+            world.setBlockState(pos, Blocks.AIR.getDefaultState(), NOTIFY_ALL);
+
+            // only play a few sounds, instead of every overwritten block
+            if (!neighborState.isOf(Blocks.AIR)) {
+                ImpenduitsCommon.LOGGER.info("Played Sound!" + neighborState.getBlock().getName());
+                world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.BLOCKS);
+            }
         }
 
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
@@ -134,6 +137,11 @@ public class ImpenduitFieldBlock extends Block {
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(AXIS);
+    }
+
+    @Override
+    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+        super.onBroken(world, pos, state);
     }
 
     private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
