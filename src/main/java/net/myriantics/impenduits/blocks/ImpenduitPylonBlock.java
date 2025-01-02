@@ -208,8 +208,6 @@ public class ImpenduitPylonBlock extends Block {
                                 .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
                         Block.NOTIFY_LISTENERS | FORCE_STATE);
 
-                // remove pylon positions from list so that next for loop doesn't have to deal with them
-                affectedPositions.remove(updatedPos);
             } else {
                 // an impenduit field block was spawned, so update this to true to signify that an action was completed.
                 hasSpawnedForcefield = true;

@@ -136,24 +136,6 @@ public class ImpenduitFieldBlock extends Block {
         builder.add(AXIS);
     }
 
-    private static ArrayList<BlockPos> getFieldColumnFromDirection(World world, BlockPos fieldPos, Direction lookingDirection) {
-        ArrayList<BlockPos> columnPositions = new ArrayList<>();
-
-        for (int i = 0; i < ImpenduitPylonBlock.MAX_IMPENDUIT_FIELD_SIZE; i++) {
-            BlockPos targetPos = fieldPos.offset(lookingDirection, i);
-            BlockState targetState = world.getBlockState(targetPos);
-
-            columnPositions.add(targetPos);
-
-            // break out of the loop once we an unexpected block or incompatible field
-            if (!areFieldsCompatible(world.getBlockState(fieldPos), targetState)) {
-                break;
-            }
-        }
-
-        return columnPositions;
-    }
-
     private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
         // field blockstates have to be identical to be compatible - they also are double checked to be field blocks
         return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.equals(otherField);

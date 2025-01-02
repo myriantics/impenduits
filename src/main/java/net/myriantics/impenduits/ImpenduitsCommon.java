@@ -11,6 +11,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
@@ -39,7 +40,7 @@ public class ImpenduitsCommon implements ModInitializer {
 				new ImpenduitPylonBlock(FabricBlockSettings.copyOf(Blocks.BLUE_ICE).solid()));
 		IMPENDUIT_FIELD = Registry.register(Registries.BLOCK,
 				locate("impenduit_field"),
-				new ImpenduitFieldBlock(FabricBlockSettings.copyOf(Blocks.GLASS).replaceable().noCollision().dropsNothing().hardness(-1.0f).pistonBehavior(PistonBehavior.BLOCK)));
+				new ImpenduitFieldBlock(FabricBlockSettings.copyOf(Blocks.GLASS).replaceable().noCollision().dropsNothing().hardness(-1.0f).pistonBehavior(PistonBehavior.BLOCK).sounds(BlockSoundGroup.AMETHYST_BLOCK)));
 		IMPENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
 				locate("impenduit_pylon"),
 				new BlockItem(IMPENDUIT_PYLON, new FabricItemSettings()));
