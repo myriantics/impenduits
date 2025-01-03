@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.block.NeighborUpdater;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
@@ -214,12 +215,10 @@ public class ImpenduitPylonBlock extends Block {
                 hasSpawnedForcefield = true;
 
                 // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
-                // this only notifies listeners to prevent field blocks from updating themselves while they're being placed
+                // this forces state to prevent field blocks from updating themselves while they're being placed  - i'm looking at you, redstone dust
                 Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
                 world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, pylonFacing.getAxis()),
                         Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
-                // don't update blocks ahead of the current field in the line - this prevents fucky bullshit with stuff like redstone wire
-                world.updateNeighborsExcept(updatedPos, ImpenduitsCommon.IMPENDUIT_PYLON, pylonFacing);
             }
         }
 

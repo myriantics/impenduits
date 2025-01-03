@@ -11,10 +11,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -70,7 +68,7 @@ public class ImpenduitFieldBlock extends Block {
             if (EnchantmentHelper.hasFrostWalker(livingEntity)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
-                    && !livingEntity.isTouchingWater()) {
+                    && !livingEntity.isTouchingWaterOrRain()) {
                 return shape;
             }
         }
@@ -126,7 +124,6 @@ public class ImpenduitFieldBlock extends Block {
 
             // only play a few sounds, instead of every overwritten block
             if (!neighborState.isOf(Blocks.AIR)) {
-                ImpenduitsCommon.LOGGER.info("Played Sound!" + neighborState.getBlock().getName());
                 world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.BLOCKS);
             }
         }
