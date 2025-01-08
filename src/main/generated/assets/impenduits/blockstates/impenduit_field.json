@@ -1,15 +1,15 @@
 {
   "variants": {
     "axis=x": {
-      "model": "impenduits:impenduit_field",
+      "model": "impenduits:block/impenduit_field",
       "x": 90,
       "y": 90
     },
     "axis=y": {
-      "model": "impenduits:impenduit_field"
+      "model": "impenduits:block/impenduit_field"
     },
     "axis=z": {
-      "model": "impenduits:impenduit_field",
+      "model": "impenduits:block/impenduit_field",
       "x": 90
     }
   }

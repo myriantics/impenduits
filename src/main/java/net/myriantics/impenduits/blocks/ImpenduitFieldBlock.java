@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
+import org.jetbrains.annotations.Nullable;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;

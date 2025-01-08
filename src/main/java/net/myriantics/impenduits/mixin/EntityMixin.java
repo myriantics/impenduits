@@ -75,7 +75,6 @@ public abstract class EntityMixin {
     private void updateRealVariable(CallbackInfo ci) {
         if (isInsideImpenduitField != interimIsInsideImpenduitField) {
             this.isInsideImpenduitField = this.interimIsInsideImpenduitField;
-            ImpenduitsCommon.LOGGER.info("Is Touching Water or Rain? " + isTouchingWaterOrRain());
         }
     }
 }

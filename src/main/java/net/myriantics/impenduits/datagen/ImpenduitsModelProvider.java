@@ -22,7 +22,7 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
     }
 
     private void registerImpenduitFieldBlock(BlockStateModelGenerator generator) {
-        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsCommon.IMPENDUIT_FIELD, ImpenduitsCommon.locate("impenduit_field"));
+        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsCommon.IMPENDUIT_FIELD, ImpenduitsCommon.locate("block/impenduit_field"));
 
         generator.blockStateCollector.accept(supplier);
     }
