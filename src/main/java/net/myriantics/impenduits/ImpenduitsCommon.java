@@ -3,6 +3,8 @@ package net.myriantics.impenduits;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
@@ -37,6 +39,9 @@ public class ImpenduitsCommon implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Impenduits!");
 
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(new ImpenduitsDispenserBehaviors());
+		ServerLifecycleEvents.SERVER_STARTED.register(new ImpenduitsDispenserBehaviors());
+
 		IMPENDUIT_PYLON = Registry.register(Registries.BLOCK,
 				locate("impenduit_pylon"),
 				new ImpenduitPylonBlock(FabricBlockSettings.copyOf(Blocks.BLUE_ICE).solid().sounds(BlockSoundGroup.STONE).luminance((state) -> state.get(ImpenduitPylonBlock.POWERED) ? 4 : 0)));
@@ -46,8 +51,6 @@ public class ImpenduitsCommon implements ModInitializer {
 		IMPENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
 				locate("impenduit_pylon"),
 				new BlockItem(IMPENDUIT_PYLON, new FabricItemSettings()));
-
-		ImpenduitsDispenserBehaviors.registerDispenserBehaviors();
 
 		LOGGER.info("Impenduits has initialized!");
 	}
