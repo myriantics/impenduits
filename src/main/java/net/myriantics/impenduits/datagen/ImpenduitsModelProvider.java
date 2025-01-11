@@ -32,14 +32,14 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
         BlockStateVariant singleton_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
         BlockStateVariant singleton_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
         BlockStateVariant singleton_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
-        BlockStateVariant parallel_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_no_core_z"));
-        BlockStateVariant parallel_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_no_core_z"));
-        BlockStateVariant parallel_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_core_z"));
-        BlockStateVariant parallel_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_core_z"));
-        BlockStateVariant parallel_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_no_core_x"));
-        BlockStateVariant parallel_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_no_core_x"));
-        BlockStateVariant parallel_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_powered_core_x"));
-        BlockStateVariant parallel_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_parallel_unpowered_core_x"));
+        BlockStateVariant axis_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_no_core_z"));
+        BlockStateVariant axis_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
+        BlockStateVariant axis_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_core_z"));
+        BlockStateVariant axis_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_core_z"));
+        BlockStateVariant axis_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_no_core_x"));
+        BlockStateVariant axis_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_x"));
+        BlockStateVariant axis_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_core_x"));
+        BlockStateVariant axis_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
 
         generator.registerParentedItemModel(ImpenduitsCommon.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
 
@@ -59,10 +59,10 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
                             .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_core));
                 } else {
                     boolean shouldRotate = shouldRotate(facing, axis);
-                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_unpowered_no_core_z : parallel_unpowered_no_core_x))
-                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_unpowered_core_z : parallel_unpowered_core_x))
-                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_powered_no_core_z : parallel_powered_no_core_x))
-                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? parallel_powered_core_z : parallel_powered_core_x));
+                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_no_core_z : axis_unpowered_no_core_x))
+                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_core_z : axis_unpowered_core_x))
+                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_no_core_z : axis_powered_no_core_x))
+                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_core_z : axis_powered_core_x));
                 }
             }
         }

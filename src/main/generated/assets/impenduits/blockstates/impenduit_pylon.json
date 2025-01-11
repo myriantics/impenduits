@@ -1,22 +1,22 @@
 {
   "variants": {
     "axis=x,facing=down,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "x": 180,
       "y": 90
     },
     "axis=x,facing=down,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "x": 180,
       "y": 90
     },
     "axis=x,facing=down,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "x": 180,
       "y": 90
     },
     "axis=x,facing=down,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "x": 180,
       "y": 90
     },
@@ -41,51 +41,51 @@
       "y": 90
     },
     "axis=x,facing=north,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "x": 90
     },
     "axis=x,facing=north,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "x": 90
     },
     "axis=x,facing=north,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "x": 90
     },
     "axis=x,facing=north,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "x": 90
     },
     "axis=x,facing=south,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "x": 270
     },
     "axis=x,facing=south,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "x": 270
     },
     "axis=x,facing=south,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "x": 270
     },
     "axis=x,facing=south,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "x": 270
     },
     "axis=x,facing=up,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "y": 90
     },
     "axis=x,facing=up,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "y": 90
     },
     "axis=x,facing=up,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "y": 90
     },
     "axis=x,facing=up,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "y": 90
     },
     "axis=x,facing=west,power_source_present=false,powered=false": {
@@ -129,55 +129,55 @@
       "y": 90
     },
     "axis=y,facing=east,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "x": 90,
       "y": 90
     },
     "axis=y,facing=east,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "x": 90,
       "y": 90
     },
     "axis=y,facing=east,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "x": 90,
       "y": 90
     },
     "axis=y,facing=east,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "x": 90,
       "y": 90
     },
     "axis=y,facing=north,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "x": 90
     },
     "axis=y,facing=north,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "x": 90
     },
     "axis=y,facing=north,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "x": 90
     },
     "axis=y,facing=north,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "x": 90
     },
     "axis=y,facing=south,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "x": 270
     },
     "axis=y,facing=south,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "x": 270
     },
     "axis=y,facing=south,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "x": 270
     },
     "axis=y,facing=south,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "x": 270
     },
     "axis=y,facing=up,power_source_present=false,powered=false": {
@@ -197,62 +197,62 @@
       "y": 90
     },
     "axis=y,facing=west,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z",
       "x": 90,
       "y": 270
     },
     "axis=y,facing=west,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_z",
       "x": 90,
       "y": 270
     },
     "axis=y,facing=west,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_z",
       "x": 90,
       "y": 270
     },
     "axis=y,facing=west,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_z",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_z",
       "x": 90,
       "y": 270
     },
     "axis=z,facing=down,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "x": 180,
       "y": 90
     },
     "axis=z,facing=down,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "x": 180,
       "y": 90
     },
     "axis=z,facing=down,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "x": 180,
       "y": 90
     },
     "axis=z,facing=down,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "x": 180,
       "y": 90
     },
     "axis=z,facing=east,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "x": 90,
       "y": 90
     },
     "axis=z,facing=east,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "x": 90,
       "y": 90
     },
     "axis=z,facing=east,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "x": 90,
       "y": 90
     },
     "axis=z,facing=east,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "x": 90,
       "y": 90
     },
@@ -289,38 +289,38 @@
       "x": 270
     },
     "axis=z,facing=up,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "y": 90
     },
     "axis=z,facing=up,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "y": 90
     },
     "axis=z,facing=up,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "y": 90
     },
     "axis=z,facing=up,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "y": 90
     },
     "axis=z,facing=west,power_source_present=false,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_x",
       "x": 90,
       "y": 270
     },
     "axis=z,facing=west,power_source_present=false,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_no_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_no_core_x",
       "x": 90,
       "y": 270
     },
     "axis=z,facing=west,power_source_present=true,powered=false": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_unpowered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_core_x",
       "x": 90,
       "y": 270
     },
     "axis=z,facing=west,power_source_present=true,powered=true": {
-      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_parallel_powered_core_x",
+      "model": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_powered_core_x",
       "x": 90,
       "y": 270
     }
