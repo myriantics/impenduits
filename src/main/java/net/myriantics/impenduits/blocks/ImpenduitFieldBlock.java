@@ -156,8 +156,13 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
-        super.onBroken(world, pos, state);
+    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
+        return true;
+    }
+
+    @Override
+    public boolean isSideInvisible(BlockState state, BlockState stateFrom, Direction direction) {
+        return stateFrom.equals(state);
     }
 
     private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {

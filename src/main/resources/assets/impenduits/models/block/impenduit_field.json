@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
-		"1": "impenduits:block/impenduit_field/water_flow",
+		"1": "impenduits:block/impenduit_field/impenduit_field",
 		"particle": "impenduits:block/impenduit_field/impenduit_field"
 	},
 	"elements": [
@@ -10,12 +10,11 @@
 			"from": [0, 0, 0],
 			"to": [16, 16, 16],
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0},
-				"east": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0},
-				"west": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0}
+				"north": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0, "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0, "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0, "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#1", "tintindex": 0, "cullface": "west"}
 			}
 		}
-	],
-	"display": {}
+	]
 }
