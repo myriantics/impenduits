@@ -16,6 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -32,12 +33,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
+    public static final BooleanProperty FORMED = BooleanProperty.of("formed");
 
     public ImpenduitFieldBlock(Settings settings) {
         super(settings);
 
         setDefaultState(this.getStateManager().getDefaultState()
-                .with(AXIS, Direction.Axis.Y));
+                .with(AXIS, Direction.Axis.Y)
+                .with(FORMED, true));
     }
 
     // you can always f5 through these
@@ -98,6 +101,11 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
+    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        world.setBlockState(pos, state.with(FORMED, true));
+    }
+
+    @Override
     public boolean canReplace(BlockState state, ItemPlacementContext context) {
         PlayerEntity player = context.getPlayer();
 
@@ -144,7 +152,7 @@ public class ImpenduitFieldBlock extends Block {
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(AXIS);
+        builder.add(AXIS, FORMED);
     }
 
     @Override
@@ -153,8 +161,8 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
-        // field blockstates have to be identical to be compatible - they also are double checked to be field blocks
-        return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.equals(otherField);
+        // field blockstates have to be identical (sans forming state) to be compatible - they also are double checked to be field blocks
+        return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && otherField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.get(AXIS).equals(otherField.get(AXIS));
     }
 
     private static boolean canStateSupportField(BlockState fieldState, BlockState supportState) {

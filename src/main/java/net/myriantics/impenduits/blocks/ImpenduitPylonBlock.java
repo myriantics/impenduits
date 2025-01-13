@@ -217,8 +217,11 @@ public class ImpenduitPylonBlock extends Block {
                 // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
                 // this forces state to prevent field blocks from updating themselves while they're being placed  - i'm looking at you, redstone dust
                 Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
-                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, pylonFacing.getAxis()),
+                world.setBlockState(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD.getDefaultState().with(AXIS, pylonFacing.getAxis())
+                                .with(ImpenduitFieldBlock.FORMED, false),
                         Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+                // schedule field to be updated so that it changes its state - this breaks blocks such as sugarcane by letting them know they're in an invalid state
+                world.scheduleBlockTick(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD, 1);
             }
         }
 
