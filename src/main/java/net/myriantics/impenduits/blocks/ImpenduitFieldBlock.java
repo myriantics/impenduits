@@ -6,6 +6,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -82,7 +83,8 @@ public class ImpenduitFieldBlock extends Block {
             if (EnchantmentHelper.hasFrostWalker(livingEntity)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
-                    && !livingEntity.isTouchingWaterOrRain()) {
+                    && !livingEntity.isTouchingWaterOrRain()
+                    && context.isDescending()) {
                 return shape;
             }
         }
