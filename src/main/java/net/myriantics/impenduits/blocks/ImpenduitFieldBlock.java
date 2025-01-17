@@ -83,8 +83,7 @@ public class ImpenduitFieldBlock extends Block {
             if (EnchantmentHelper.hasFrostWalker(livingEntity)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
-                    && !livingEntity.isTouchingWaterOrRain()
-                    && context.isDescending()) {
+                    && !livingEntity.isTouchingWaterOrRain()) {
                 return shape;
             }
         }
