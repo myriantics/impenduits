@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -86,22 +87,20 @@ public class ImpenduitPylonBlock extends Block {
 
     private static ArrayList<BlockPos> getAffectedPositions(World world, BlockState originState, BlockPos originPos) {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
-        int boundedFieldLength = MAX_IMPENDUIT_FIELD_SIZE;
+        int maxFieldColumnLength = MAX_IMPENDUIT_FIELD_SIZE;
 
         final Direction.Axis originPylonAxis = originState.get(AXIS);
         final boolean isSingleton = originState.get(FACING).getAxis().equals(originPylonAxis);
 
         Direction checkingDirection = Direction.from(originPylonAxis, Direction.AxisDirection.NEGATIVE);
-        BlockPos checkingMutableOriginPos = originPos.mutableCopy();
+        BlockPos pylonMutableCheckingSourcePos = originPos.mutableCopy();
 
         // tracks if the for loop has flipped directions or not - modified on first interruption, triggers loop exit on second.
         boolean flipped = false;
 
-
         for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE; neighborOffset++) {
-            BlockPos targetNeighboringPylonPos = checkingMutableOriginPos.offset(checkingDirection, neighborOffset);
+            BlockPos targetNeighboringPylonPos = pylonMutableCheckingSourcePos.offset(checkingDirection, neighborOffset);
             BlockState targetNeighborState = world.getBlockState(targetNeighboringPylonPos);
-
 
             // if pylon doesn't pass compatibility checks, do loop bullshit
             if (!areNeighboringPylonsCompatible(originState, targetNeighborState)) {
@@ -118,11 +117,14 @@ public class ImpenduitPylonBlock extends Block {
 
                 // walk target neighbor pos back towards the origin before resetting origin - also decrement neighbor offset
                 // this serves to stop the deactivation from missing pylons that still need to get depowered
-                checkingMutableOriginPos = targetNeighboringPylonPos.offset(checkingDirection);
+                pylonMutableCheckingSourcePos = targetNeighboringPylonPos.offset(checkingDirection, 1);
                 neighborOffset--;
+
+                // don't process further - will cause field to not form because it will try to form field off of invalid block - not good
+                continue;
             }
 
-            ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(world, targetNeighboringPylonPos, originState, originPos, boundedFieldLength);
+            ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(world, targetNeighboringPylonPos, originState, originPos, maxFieldColumnLength);
 
             // don't bother checking for adjacent pylons if the origin one is a singleton - slightly more performant
             // if we get an empty field column here, don't add anything else to the list
@@ -133,10 +135,13 @@ public class ImpenduitPylonBlock extends Block {
             // once we're sure that the target pylon is compatible and can spawn fields, we can add it to the list
             affectedPositions.add(targetNeighboringPylonPos);
 
+            // add in the field and opposing pylon positions so they get updated as well - totally didn't forget to do this
+            affectedPositions.addAll(fieldColumnPositions);
+
             // set the bounds that all field columns following the origin one must follow
             // don't run this on anything but the origin column!
-            if (boundedFieldLength != fieldColumnPositions.size() - 1 && targetNeighboringPylonPos == originPos) {
-                boundedFieldLength = fieldColumnPositions.size() - 1;
+            if (maxFieldColumnLength != fieldColumnPositions.size() - 1 && targetNeighboringPylonPos == originPos) {
+                maxFieldColumnLength = fieldColumnPositions.size() - 1;
             }
         }
 
@@ -205,8 +210,7 @@ public class ImpenduitPylonBlock extends Block {
             if (!ImpenduitFieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
 
                 // final check to see if field can actually form - if this fails, clear the whole list to indicate failure
-                if (!areOpposingPylonsCompatible(originState, targetState)
-                        || facingDirOffset != boundedFieldLength) {
+                if (!areOpposingPylonsCompatible(originState, targetState)) {
                     unconfirmedBlockPosList.clear();
                 }
 
@@ -251,8 +255,6 @@ public class ImpenduitPylonBlock extends Block {
                 world.scheduleBlockTick(updatedPos, ImpenduitsCommon.IMPENDUIT_FIELD, 1);
             }
         }
-
-        // if actions were actually performed, it was a success! return true
     }
 
     public static void insertPowerCore(World world, BlockPos pos) {
