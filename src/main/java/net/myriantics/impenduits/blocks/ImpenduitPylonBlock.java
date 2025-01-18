@@ -126,9 +126,8 @@ public class ImpenduitPylonBlock extends Block {
 
             ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(world, targetNeighboringPylonPos, originState, originPos, maxFieldColumnLength);
 
-            // don't bother checking for adjacent pylons if the origin one is a singleton - slightly more performant
             // if we get an empty field column here, don't add anything else to the list
-            if (isSingleton || fieldColumnPositions.isEmpty()) {
+            if (fieldColumnPositions.isEmpty()) {
                 break;
             }
 
@@ -137,6 +136,11 @@ public class ImpenduitPylonBlock extends Block {
 
             // add in the field and opposing pylon positions so they get updated as well - totally didn't forget to do this
             affectedPositions.addAll(fieldColumnPositions);
+
+            // don't bother checking for adjacent pylons if the origin one is a singleton - slightly more performant
+            if (isSingleton) {
+                break;
+            }
 
             // set the bounds that all field columns following the origin one must follow
             // don't run this on anything but the origin column!
@@ -204,16 +208,25 @@ public class ImpenduitPylonBlock extends Block {
             BlockPos targetPos = targetNeighboringPylonPos.offset(originState.get(FACING), facingDirOffset);
             BlockState targetState = world.getBlockState(targetPos);
 
-            unconfirmedBlockPosList.add(targetPos);
 
-            // if impenduits can't replace target state, end off the loop
-            if (!ImpenduitFieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
+            if (ImpenduitFieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
+
+                // protect against fields stretching out to max length if unbounded
+                if (facingDirOffset == boundedFieldLength) {
+                    unconfirmedBlockPosList.clear();
+                    break;
+                }
+
+                unconfirmedBlockPosList.add(targetPos);
+
+            } else {
 
                 // final check to see if field can actually form - if this fails, clear the whole list to indicate failure
                 if (!areOpposingPylonsCompatible(originState, targetState)) {
                     unconfirmedBlockPosList.clear();
                 }
 
+                // if fields can't replace target state, end off the loop no matter what
                 break;
             }
         }
