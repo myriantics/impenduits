@@ -64,7 +64,6 @@ public class ImpenduitPylonBlock extends Block {
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 removePowerCore(world, pos);
-                handStack.damage(1, player, (e) -> player.sendEquipmentBreakStatus(hand.equals(Hand.MAIN_HAND) ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND));
             }
             return ActionResult.SUCCESS;
         }
@@ -208,6 +207,8 @@ public class ImpenduitPylonBlock extends Block {
             BlockPos targetPos = targetNeighboringPylonPos.offset(originState.get(FACING), facingDirOffset);
             BlockState targetState = world.getBlockState(targetPos);
 
+            // we always want to add the target block to the list - if this operation fails for any reason it clears the list, so no reason not to
+            unconfirmedBlockPosList.add(targetPos);
 
             if (ImpenduitFieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
 
@@ -216,8 +217,6 @@ public class ImpenduitPylonBlock extends Block {
                     unconfirmedBlockPosList.clear();
                     break;
                 }
-
-                unconfirmedBlockPosList.add(targetPos);
 
             } else {
 
