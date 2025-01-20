@@ -1,3 +1,3 @@
 {
-  "parent": "impenduits:block/impenduit_pylon/impenduit_pylon_singleton_unpowered_no_core"
+  "parent": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_unpowered_no_core_z"
 }

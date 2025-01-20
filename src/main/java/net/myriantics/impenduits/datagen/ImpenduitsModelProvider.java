@@ -41,7 +41,7 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
         BlockStateVariant axis_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_core_x"));
         BlockStateVariant axis_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
 
-        generator.registerParentedItemModel(ImpenduitsCommon.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
+        generator.registerParentedItemModel(ImpenduitsCommon.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
 
         BlockStateVariantMap.QuadrupleProperty<Direction, Direction.Axis, Boolean, Boolean> map = BlockStateVariantMap.create(ImpenduitPylonBlock.FACING, ImpenduitPylonBlock.AXIS, ImpenduitPylonBlock.POWERED, ImpenduitPylonBlock.POWER_SOURCE_PRESENT);
 

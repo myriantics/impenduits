@@ -14,5 +14,6 @@ public class ImpenduitsDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(ImpenduitsModelProvider::new);
 		pack.addProvider(ImpenduitsBlockLootTableProvider::new);
 		pack.addProvider(ImpenduitsBlockInteractionLootTableProvider::new);
+		pack.addProvider(ImpenduitsRecipeProvider::new);
 	}
 }
