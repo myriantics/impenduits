@@ -13,12 +13,6 @@ import net.minecraft.loot.LootManager;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTableReporter;
 import net.minecraft.loot.context.*;
-import net.minecraft.loot.entry.LootPoolEntry;
-import net.minecraft.loot.entry.LootTableEntry;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
-import net.minecraft.resource.ResourceReloader;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -118,51 +112,53 @@ public class ImpenduitPylonBlock extends Block {
             BlockPos targetNeighboringPylonPos = pylonMutableCheckingSourcePos.offset(checkingDirection, neighborOffset);
             BlockState targetNeighborState = world.getBlockState(targetNeighboringPylonPos);
 
-            // if pylon doesn't pass compatibility checks, do loop bullshit
-            if (!areNeighboringPylonsCompatible(originState, targetNeighborState)) {
+            if (areNeighboringPylonsCompatible(originState, targetNeighborState)) {
 
-                // don't switch directions more than once
-                if (flipped) {
-                    break;
+                ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(world, targetNeighboringPylonPos, originState, originPos, maxFieldColumnLength);
+
+                // if we get an empty field column here, don't add anything else to the list
+                if (!fieldColumnPositions.isEmpty()) {
+
+                    // once we're sure that the target pylon is compatible and can spawn fields, we can add it to the list
+                    affectedPositions.add(targetNeighboringPylonPos);
+
+                    // add in the field and opposing pylon positions so they get updated as well - totally didn't forget to do this
+                    affectedPositions.addAll(fieldColumnPositions);
+
+                    // don't bother checking for adjacent pylons if the origin one is a singleton - slightly more performant
+                    if (isSingleton) {
+                        break;
+                    }
+
+                    // set the bounds that all field columns following the origin one must follow
+                    // don't run this on anything but the origin column!
+                    if (maxFieldColumnLength != fieldColumnPositions.size() - 1 && targetNeighboringPylonPos == originPos) {
+                        maxFieldColumnLength = fieldColumnPositions.size() - 1;
+                    }
+
+                    // checks succeeded - don't run any of the below code
+                    continue;
                 }
-
-                flipped = true;
-
-                // as soon as you hit an incompatible pylon, flip checking direction around to the other side
-                checkingDirection = checkingDirection.getOpposite();
-
-                // walk target neighbor pos back towards the origin before resetting origin - also decrement neighbor offset
-                // this serves to stop the deactivation from missing pylons that still need to get depowered
-                pylonMutableCheckingSourcePos = targetNeighboringPylonPos.offset(checkingDirection, 1);
-                neighborOffset--;
-
-                // don't process further - will cause field to not form because it will try to form field off of invalid block - not good
-                continue;
             }
 
-            ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(world, targetNeighboringPylonPos, originState, originPos, maxFieldColumnLength);
+            // if any checks have failed, run the below processing to switch directions / break
 
-            // if we get an empty field column here, don't add anything else to the list
-            if (fieldColumnPositions.isEmpty()) {
+            // don't switch directions more than once
+            if (flipped) {
                 break;
             }
 
-            // once we're sure that the target pylon is compatible and can spawn fields, we can add it to the list
-            affectedPositions.add(targetNeighboringPylonPos);
+            flipped = true;
 
-            // add in the field and opposing pylon positions so they get updated as well - totally didn't forget to do this
-            affectedPositions.addAll(fieldColumnPositions);
+            // as soon as you hit an incompatible pylon, flip checking direction around to the other side
+            checkingDirection = checkingDirection.getOpposite();
 
-            // don't bother checking for adjacent pylons if the origin one is a singleton - slightly more performant
-            if (isSingleton) {
-                break;
-            }
+            // walk target neighbor pos back towards the origin before resetting origin - also decrement neighbor offset
+            // this serves to stop the deactivation from missing pylons that still need to get depowered
+            pylonMutableCheckingSourcePos = targetNeighboringPylonPos.offset(checkingDirection, 1);
+            neighborOffset--;
 
-            // set the bounds that all field columns following the origin one must follow
-            // don't run this on anything but the origin column!
-            if (maxFieldColumnLength != fieldColumnPositions.size() - 1 && targetNeighboringPylonPos == originPos) {
-                maxFieldColumnLength = fieldColumnPositions.size() - 1;
-            }
+            // don't process further - will cause field to not form because it will try to form field off of invalid block - not good
         }
 
         return affectedPositions;
