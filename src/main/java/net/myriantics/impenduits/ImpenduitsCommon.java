@@ -19,6 +19,7 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
+import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.util.ImpenduitsDispenserBehaviors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.ImpenduitsCommon;
@@ -19,6 +20,9 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
 
         getOrCreateTagBuilder(TagKey.of(RegistryKeys.BLOCK, Identifier.of("create", "wrench_pickup")))
+                .add(ImpenduitsCommon.IMPENDUIT_PYLON);
+
+        getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(ImpenduitsCommon.IMPENDUIT_PYLON);
     }
 }

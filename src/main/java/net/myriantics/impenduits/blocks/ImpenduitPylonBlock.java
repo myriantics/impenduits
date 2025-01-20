@@ -1,5 +1,6 @@
 package net.myriantics.impenduits.blocks;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
@@ -8,7 +9,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.LootManager;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTableReporter;
+import net.minecraft.loot.context.*;
+import net.minecraft.loot.entry.LootPoolEntry;
+import net.minecraft.loot.entry.LootTableEntry;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.resource.ReloadableResourceManagerImpl;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -18,13 +29,16 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,12 +72,15 @@ public class ImpenduitPylonBlock extends Block {
                 && !state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 insertPowerCore(world, pos);
+                if (!player.isCreative()) {
+                    handStack.decrement(1);
+                }
             }
             return ActionResult.SUCCESS;
         } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
-                removePowerCore(world, pos);
+                removePowerCore(world, pos, handStack);
             }
             return ActionResult.SUCCESS;
         }
@@ -278,13 +295,28 @@ public class ImpenduitPylonBlock extends Block {
         spawnForcefield(pylonState.cycle(POWER_SOURCE_PRESENT), world, pos);
     }
 
-    public static void removePowerCore(World world, BlockPos pos) {
+    public static void removePowerCore(World world, BlockPos pos, ItemStack usedStack) {
         BlockState pylonState = world.getBlockState(pos);
 
         world.updateComparators(pos, ImpenduitsCommon.IMPENDUIT_PYLON);
         world.playSound(null, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
         world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, false));
-        ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.HEART_OF_THE_SEA));
+
+        if (world instanceof ServerWorld serverWorld) {
+            Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
+
+            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getLootManager().getLootTable(lootTableId)
+                    .generateLoot(new LootContextParameterSet.Builder(serverWorld)
+                            .add(LootContextParameters.TOOL, usedStack)
+                            .add(LootContextParameters.BLOCK_STATE, pylonState)
+                            .add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos))
+                            .build(LootContextTypes.BLOCK));
+
+            for (ItemStack stack : outputStacks) {
+                ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+            }
+        }
+
         deactivatePylonRow(world, pos);
     }
 

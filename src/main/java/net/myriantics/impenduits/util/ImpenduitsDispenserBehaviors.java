@@ -82,7 +82,7 @@ public class ImpenduitsDispenserBehaviors implements ServerLifecycleEvents.EndDa
 
                 if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
                     if (targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                        ImpenduitPylonBlock.removePowerCore(world, targetPos);
+                        ImpenduitPylonBlock.removePowerCore(world, targetPos, stack);
                     } else {
                         this.setSuccess(false);
                     }
