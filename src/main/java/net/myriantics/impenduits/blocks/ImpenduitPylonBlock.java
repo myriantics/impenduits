@@ -144,7 +144,8 @@ public class ImpenduitPylonBlock extends Block {
             // if any checks have failed, run the below processing to switch directions / break
 
             // don't switch directions more than once
-            if (flipped) {
+            // also break out of loop if it fails on the origin pylon - this is to prevent adjacent pylons from being powered on
+            if (flipped || targetNeighboringPylonPos == originPos) {
                 break;
             }
 
