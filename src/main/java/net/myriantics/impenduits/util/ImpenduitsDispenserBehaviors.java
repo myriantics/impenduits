@@ -53,10 +53,10 @@ public class ImpenduitsDispenserBehaviors implements ServerLifecycleEvents.EndDa
                 this.setSuccess(true);
 
                 // if it's an impenduit without the power core, run this
-                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                if (targetState.getBlock() instanceof ImpenduitPylonBlock pylonBlock) {
 
                     if (!targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                        ImpenduitPylonBlock.insertPowerCore(world, targetPos);
+                        pylonBlock.insertPowerCore(world, targetPos);
                         stack.decrement(1);
                     } else {
                         this.setSuccess(false);
@@ -80,9 +80,9 @@ public class ImpenduitsDispenserBehaviors implements ServerLifecycleEvents.EndDa
 
                 this.setSuccess(true);
 
-                if (targetState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
+                if (targetState.getBlock() instanceof ImpenduitPylonBlock pylonBlock) {
                     if (targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                        ImpenduitPylonBlock.removePowerCore(world, targetPos, stack);
+                        pylonBlock.removePowerCore(world, targetPos, stack);
                     } else {
                         this.setSuccess(false);
                     }

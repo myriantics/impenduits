@@ -43,13 +43,8 @@ public class ImpenduitsCommon implements ModInitializer {
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(new ImpenduitsDispenserBehaviors());
 		ServerLifecycleEvents.SERVER_STARTED.register(new ImpenduitsDispenserBehaviors());
 
-		IMPENDUIT_PYLON = Registry.register(Registries.BLOCK,
-				locate("impenduit_pylon"),
-				new ImpenduitPylonBlock(FabricBlockSettings
-						.copyOf(Blocks.DARK_PRISMARINE)
-						.solid()
-						.sounds(BlockSoundGroup.STONE)
-						.luminance((state) -> state.get(ImpenduitPylonBlock.POWERED) ? 4 : 0)));
+		// pretty sure you can just register new pylon and field blocks and they'll work together
+
 		IMPENDUIT_FIELD = Registry.register(Registries.BLOCK,
 				locate("impenduit_field"),
 				new ImpenduitFieldBlock(
@@ -62,10 +57,31 @@ public class ImpenduitsCommon implements ModInitializer {
 								.pistonBehavior(PistonBehavior.BLOCK)
 								.sounds(BlockSoundGroup.AMETHYST_BLOCK)
 								.luminance(8)));
+		IMPENDUIT_PYLON = Registry.register(Registries.BLOCK,
+				locate("impenduit_pylon"),
+				new ImpenduitPylonBlock(FabricBlockSettings
+						.copyOf(Blocks.DARK_PRISMARINE)
+						.solid()
+						.sounds(BlockSoundGroup.STONE)
+						.luminance((state) -> state.get(ImpenduitPylonBlock.POWERED) ? 4 : 0)
+						,(ImpenduitFieldBlock) IMPENDUIT_FIELD));
 		IMPENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
 				locate("impenduit_pylon"),
 				new BlockItem(IMPENDUIT_PYLON, new FabricItemSettings()));
 
+		// example of how to add new variants
+
+		/*
+		SCHMENDUIT_FIELD = Registry.register(Registries.BLOCK,
+				locate("schmenduit_field"),
+				new ImpenduitFieldBlock(FabricBlockSettings.copyOf(IMPENDUIT_FIELD)));
+		SCHMENDUIT_PYLON = Registry.register(Registries.BLOCK,
+				locate("schmenduit_pylon"),
+				new ImpenduitPylonBlock(FabricBlockSettings.copyOf(IMPENDUIT_PYLON), (ImpenduitFieldBlock) SCHMENDUIT_FIELD));
+		SCHMENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
+				locate("schmenduit_pylon"),
+				new BlockItem(SCHMENDUIT_PYLON, new FabricItemSettings()));
+		 */
 		LOGGER.info("Impenduits has initialized!");
 	}
 }

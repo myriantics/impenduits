@@ -20,8 +20,8 @@ public abstract class PistonBlockMixin {
     private static PistonBehavior pistonBehaviorOverride2(PistonBehavior original, @Local(argsOnly = true) BlockState pushedState) {
 
         // you're not allowed to push anything in an established impenduit field
-        if (pushedState.isOf(ImpenduitsCommon.IMPENDUIT_PYLON)) {
-            return ImpenduitPylonBlock.getPistonBehaviorFromState(pushedState);
+        if (pushedState.getBlock() instanceof ImpenduitPylonBlock impenduitPylonBlock) {
+            return impenduitPylonBlock.getPistonBehaviorFromState(pushedState);
         }
 
         return original;

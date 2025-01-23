@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -63,7 +64,7 @@ public abstract class EntityMixin {
     )
     private void checkForImpenduitField(CallbackInfo ci, @Local BlockState checkedState) {
         if (!interimIsInsideImpenduitField) {
-            this.interimIsInsideImpenduitField = checkedState.isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
+            this.interimIsInsideImpenduitField = checkedState.getBlock() instanceof ImpenduitFieldBlock;
         }
     }
 

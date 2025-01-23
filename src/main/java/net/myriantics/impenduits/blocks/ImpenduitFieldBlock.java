@@ -3,14 +3,10 @@ package net.myriantics.impenduits.blocks;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.Perspective;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.MinecartEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
@@ -30,7 +26,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
-import org.jetbrains.annotations.Nullable;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
@@ -62,7 +57,7 @@ public class ImpenduitFieldBlock extends Block {
             // note to self - blockviews are SHITE
             try {
                 // the outline only shows up if your head isn't in the targeted block
-                shouldGetShape = !player.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
+                shouldGetShape = !player.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(this);
             } catch (ArrayIndexOutOfBoundsException fuckingshitexception) {
                 ImpenduitsCommon.LOGGER.warn("Shitass exception tried to trigger. I tried to fix this, but this janky hack should work to cover my bases.");
             }
@@ -111,10 +106,10 @@ public class ImpenduitFieldBlock extends Block {
         PlayerEntity player = context.getPlayer();
 
         // you can only replace the field block if your head is inside one
-        return player != null && context.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(ImpenduitsCommon.IMPENDUIT_FIELD);
+        return player != null && context.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(this);
     }
 
-    public static boolean canFieldReplaceBlock(World world, BlockPos pos, BlockState state) {
+    public boolean canFieldReplaceBlock(World world, BlockPos pos, BlockState state) {
         return (
                 // if the block is already replaceable, you're good
                 state.isReplaceable()
@@ -124,7 +119,7 @@ public class ImpenduitFieldBlock extends Block {
                         || (state.getHardness(null, null) == 0f && !state.isFullCube(world, pos))
         )
                 // fields can't replace other fields
-                && !state.isOf(ImpenduitsCommon.IMPENDUIT_FIELD)
+                && !(state.getBlock() instanceof ImpenduitFieldBlock)
                 // denylist overrides any other conditions
                 && !state.isIn(ImpenduitsTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_DENYLIST);
     }
@@ -144,7 +139,7 @@ public class ImpenduitFieldBlock extends Block {
 
             // only play a few sounds, instead of every overwritten block
             if (!neighborState.isOf(Blocks.AIR)) {
-                world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.BLOCKS);
+                world.playSound(null, pos, this.soundGroup.getBreakSound(), SoundCategory.BLOCKS);
             }
         }
 
@@ -166,12 +161,13 @@ public class ImpenduitFieldBlock extends Block {
         return stateFrom.equals(state);
     }
 
-    private static boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
+    private boolean areFieldsCompatible(BlockState originField, BlockState otherField) {
         // field blockstates have to be identical (sans forming state) to be compatible - they also are double checked to be field blocks
-        return originField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && otherField.isOf(ImpenduitsCommon.IMPENDUIT_FIELD) && originField.get(AXIS).equals(otherField.get(AXIS));
+        return originField.isOf(this) && otherField.isOf(this) && originField.get(AXIS).equals(otherField.get(AXIS));
     }
 
-    private static boolean canStateSupportField(BlockState fieldState, BlockState supportState) {
-        return areFieldsCompatible(fieldState, supportState) ||  ImpenduitPylonBlock.canSupportField(supportState, fieldState);
+    private boolean canStateSupportField(BlockState fieldState, BlockState supportState) {
+        return areFieldsCompatible(fieldState, supportState)
+                || (supportState.getBlock() instanceof ImpenduitPylonBlock pylonBlock && pylonBlock.canSupportField(supportState, fieldState)) ;
     }
 }
