@@ -21,16 +21,14 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.util.ImpenduitsTags;
@@ -85,6 +83,12 @@ public class ImpenduitPylonBlock extends Block {
         }
 
         return super.onUse(state, world, pos, player, hand, hit);
+    }
+
+    // todo: add some functionality to this
+    @Override
+    public BlockState rotate(BlockState state, BlockRotation rotation) {
+        return super.rotate(state, rotation);
     }
 
     @Override
@@ -300,6 +304,9 @@ public class ImpenduitPylonBlock extends Block {
     public void insertPowerCore(World world, BlockPos pos) {
         BlockState pylonState = world.getBlockState(pos);
 
+        // trip sculk sensors
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
+
         world.updateComparators(pos, this);
         world.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
         world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, true));
@@ -308,6 +315,9 @@ public class ImpenduitPylonBlock extends Block {
 
     public void removePowerCore(World world, BlockPos pos, ItemStack usedStack) {
         BlockState pylonState = world.getBlockState(pos);
+
+        // trip sculk sensors
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
 
         world.playSound(null, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
         world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, false));

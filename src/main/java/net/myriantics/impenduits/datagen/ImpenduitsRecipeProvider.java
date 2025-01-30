@@ -28,9 +28,10 @@ public class ImpenduitsRecipeProvider extends FabricRecipeProvider {
         ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, ImpenduitsCommon.IMPENDUIT_PYLON, 4)
                 .input('D', Items.DARK_PRISMARINE)
                 .input('L', Items.SEA_LANTERN)
+                .input('C', Items.PRISMARINE_CRYSTALS)
                 .input('B', Items.PRISMARINE_BRICKS)
-                .pattern("LLL")
-                .pattern("DDD")
+                .pattern("CCC")
+                .pattern("DLD")
                 .pattern("BDB")
                 .criterion("heart_of_the_sea", conditionsFromItem(Items.HEART_OF_THE_SEA))
                 .offerTo(exporter);

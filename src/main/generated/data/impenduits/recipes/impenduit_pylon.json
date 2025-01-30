@@ -5,6 +5,9 @@
     "B": {
       "item": "minecraft:prismarine_bricks"
     },
+    "C": {
+      "item": "minecraft:prismarine_crystals"
+    },
     "D": {
       "item": "minecraft:dark_prismarine"
     },
@@ -13,8 +16,8 @@
     }
   },
   "pattern": [
-    "LLL",
-    "DDD",
+    "CCC",
+    "DLD",
     "BDB"
   ],
   "result": {

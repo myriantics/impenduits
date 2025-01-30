@@ -52,7 +52,6 @@ public class ImpenduitsCommon implements ModInitializer {
 				new ImpenduitFieldBlock(
 						FabricBlockSettings.copyOf(Blocks.GLASS)
 								.slipperiness(0.98f)
-								.replaceable()
 								.noCollision()
 								.dropsNothing()
 								.hardness(-1.0f)
