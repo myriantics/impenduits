@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
-		"1": "impenduits:block/impenduit_pylon/impenduit_pylon_bottom",
+		"1": "block/prismarine_bricks",
 		"2": "impenduits:block/impenduit_pylon/impenduit_pylon_side_on_no_core",
 		"3": "impenduits:block/impenduit_pylon/impenduit_pylon_emitter_axis_on",
 		"4": "impenduits:block/impenduit_pylon/impenduit_pylon_axis_side_on",

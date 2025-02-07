@@ -19,10 +19,10 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
 
-        getOrCreateTagBuilder(TagKey.of(RegistryKeys.BLOCK, Identifier.of("create", "wrench_pickup")))
-                .add(ImpenduitsCommon.IMPENDUIT_PYLON);
-
         getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(ImpenduitsCommon.IMPENDUIT_PYLON);
+
+        getOrCreateTagBuilder(BlockTags.IMPERMEABLE)
+                .add(ImpenduitsCommon.IMPENDUIT_FIELD);
     }
 }
