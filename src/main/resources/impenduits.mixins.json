@@ -3,7 +3,6 @@
   "package": "net.myriantics.impenduits.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractBlockStateMixin",
     "DispenserBlockInvoker",
     "EntityMixin",
     "FlowableFluidMixin",
