@@ -8,6 +8,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.util.ImpenduitsTags;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -23,6 +24,9 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
                 .add(ImpenduitsCommon.IMPENDUIT_PYLON);
 
         getOrCreateTagBuilder(BlockTags.IMPERMEABLE)
+                .add(ImpenduitsCommon.IMPENDUIT_FIELD);
+
+        getOrCreateTagBuilder(ImpenduitsTags.ENTITY_RAIN_MIMICKING_BLOCKS)
                 .add(ImpenduitsCommon.IMPENDUIT_FIELD);
     }
 }
