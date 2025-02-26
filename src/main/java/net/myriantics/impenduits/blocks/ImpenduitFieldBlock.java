@@ -4,11 +4,18 @@ import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.ReloadableRegistries;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -24,6 +31,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 
@@ -75,7 +83,10 @@ public class ImpenduitFieldBlock extends Block {
             VoxelShape shape = VoxelShapes.fullCube();
 
             // entities can walk on impenduit pylons if they have frost walker
-            if (EnchantmentHelper.hasFrostWalker(livingEntity)
+            if (
+                    // fuck the rework to how enchants work lmao
+                    // bulls
+                    (EnchantmentHelper.getEquipmentLevel(livingEntity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(Enchantments.FROST_WALKER), livingEntity) > 0)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
                     && !livingEntity.isTouchingWaterOrRain()) {
@@ -87,7 +98,7 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+    protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         return false;
     }
 
@@ -125,7 +136,7 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
+    public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 

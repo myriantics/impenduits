@@ -11,9 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:heart_of_the_sea"
-            ]
+            "items": "minecraft:heart_of_the_sea"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "heart_of_the_sea",
-      "has_the_recipe"
+      "has_the_recipe",
+      "heart_of_the_sea"
     ]
   ],
   "rewards": {
     "recipes": [
       "impenduits:impenduit_pylon"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

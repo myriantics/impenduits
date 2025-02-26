@@ -5,7 +5,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.AbstractBlock;
@@ -43,33 +42,30 @@ public class ImpenduitsCommon implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Impenduits!");
 
-		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(new ImpenduitsDispenserBehaviors());
-		ServerLifecycleEvents.SERVER_STARTED.register(new ImpenduitsDispenserBehaviors());
-
 		// pretty sure you can just register new pylon and field blocks and they'll work together
 
 		IMPENDUIT_FIELD = Registry.register(Registries.BLOCK,
 				locate("impenduit_field"),
 				new ImpenduitFieldBlock(
-						FabricBlockSettings.copyOf(Blocks.GLASS)
+						AbstractBlock.Settings.copy(Blocks.GLASS)
 								.slipperiness(0.98f)
 								.noCollision()
 								.dropsNothing()
 								.hardness(-1.0f)
 								.pistonBehavior(PistonBehavior.BLOCK)
 								.sounds(BlockSoundGroup.AMETHYST_BLOCK)
-								.luminance(8)));
+								.luminance((state) -> 8)));
 		IMPENDUIT_PYLON = Registry.register(Registries.BLOCK,
 				locate("impenduit_pylon"),
-				new ImpenduitPylonBlock(FabricBlockSettings
-						.copyOf(Blocks.DARK_PRISMARINE)
+				new ImpenduitPylonBlock(AbstractBlock.Settings
+						.copy(Blocks.DARK_PRISMARINE)
 						.solid()
 						.sounds(BlockSoundGroup.STONE)
 						.luminance((state) -> state.get(ImpenduitPylonBlock.POWERED) ? 4 : 0)
 						,(ImpenduitFieldBlock) IMPENDUIT_FIELD));
 		IMPENDUIT_PYLON_BLOCKITEM = Registry.register(Registries.ITEM,
 				locate("impenduit_pylon"),
-				new BlockItem(IMPENDUIT_PYLON, new FabricItemSettings()));
+				new BlockItem(IMPENDUIT_PYLON, new Item.Settings()));
 
 		// add pylon to creative tab groups
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.REDSTONE).register((fabricItemGroupEntries -> fabricItemGroupEntries.add(IMPENDUIT_PYLON)));

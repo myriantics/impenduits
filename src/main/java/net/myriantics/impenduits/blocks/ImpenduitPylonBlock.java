@@ -9,10 +9,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.LootManager;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTableReporter;
 import net.minecraft.loot.context.*;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.ReloadableRegistries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -60,8 +62,8 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        ItemStack handStack = player.getStackInHand(hand);
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        ItemStack handStack = player.getStackInHand(player.getActiveHand());
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
@@ -82,7 +84,7 @@ public class ImpenduitPylonBlock extends Block {
             return ActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     // todo: add some functionality to this
@@ -326,7 +328,7 @@ public class ImpenduitPylonBlock extends Block {
         if (world instanceof ServerWorld serverWorld) {
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
-            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getLootManager().getLootTable(lootTableId)
+            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId))
                     .generateLoot(new LootContextParameterSet.Builder(serverWorld)
                             .add(LootContextParameters.TOOL, usedStack)
                             .add(LootContextParameters.BLOCK_STATE, pylonState)

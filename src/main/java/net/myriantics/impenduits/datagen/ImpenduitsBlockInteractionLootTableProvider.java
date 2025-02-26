@@ -11,27 +11,31 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ImpenduitsBlockInteractionLootTableProvider extends SimpleFabricLootTableProvider {
-    public ImpenduitsBlockInteractionLootTableProvider(FabricDataOutput output) {
-        super(output, LootContextTypes.BLOCK);
+    public ImpenduitsBlockInteractionLootTableProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+        super(output, registryLookup, LootContextTypes.BLOCK);
     }
 
     @Override
-    public void accept(BiConsumer<Identifier, LootTable.Builder> exporter) {
-        generateImpenduitPylonPowerCoreRemovalLootTable(exporter, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
+    public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> lootTableBiConsumer) {
+        generateImpenduitPylonPowerCoreRemovalLootTable(lootTableBiConsumer, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
-    public void generateImpenduitPylonPowerCoreRemovalLootTable(BiConsumer<Identifier, LootTable.Builder> exporter, Block pylon, Item powerCoreItem) {
+    public void generateImpenduitPylonPowerCoreRemovalLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> exporter, Block pylon, Item powerCoreItem) {
 
         Identifier tableId = locatePylonPowerCoreRemovalId(pylon);
 
-        exporter.accept(tableId, LootTable.builder()
+        exporter.accept(RegistryKey.of(RegistryKeys.LOOT_TABLE, tableId), LootTable.builder()
                 .pool(
                         LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1.0f))

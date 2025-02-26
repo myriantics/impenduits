@@ -22,7 +22,6 @@
   ],
   "result": {
     "count": 4,
-    "item": "impenduits:impenduit_pylon"
-  },
-  "show_notification": true
+    "id": "impenduits:impenduit_pylon"
+  }
 }
