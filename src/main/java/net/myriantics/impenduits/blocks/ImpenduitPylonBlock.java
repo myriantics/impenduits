@@ -62,8 +62,8 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        ItemStack handStack = player.getStackInHand(player.getActiveHand());
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        ItemStack handStack = player.getStackInHand(hand);
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
@@ -75,16 +75,16 @@ public class ImpenduitPylonBlock extends Block {
                     handStack.decrement(1);
                 }
             }
-            return ActionResult.SUCCESS;
+            return ItemActionResult.SUCCESS;
         } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 removePowerCore(world, pos, handStack);
             }
-            return ActionResult.SUCCESS;
+            return ItemActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
     }
 
     // todo: add some functionality to this

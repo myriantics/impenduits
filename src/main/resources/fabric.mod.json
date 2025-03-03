@@ -11,7 +11,7 @@
 		"fishnpotatoes"
 	],
 	"contact": {
-		"homepage": "https://reddit.com/r/feedthememes",
+		"homepage": "https://modrinth.com/mod/impenduits",
 		"sources": "https://github.com/myriantics/impenduits"
 	},
 	"license": "MIT",
@@ -38,5 +38,7 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
+	},
+	"custom": {
 	}
 }
