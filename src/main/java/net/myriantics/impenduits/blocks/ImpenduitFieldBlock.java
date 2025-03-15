@@ -16,6 +16,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.ReloadableRegistries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.server.Main;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -55,21 +56,17 @@ public class ImpenduitFieldBlock extends Block {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        boolean shouldGetShape = false;
+        boolean shouldGetShape = true;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-
-        // only do this on the client
-        if (player != null) {
+        if (context instanceof EntityShapeContext entityShapeContext && entityShapeContext.getEntity() instanceof PlayerEntity player) {
 
             // note to self - blockviews are SHITE
             try {
                 // the outline only shows up if your head isn't in the targeted block
                 shouldGetShape = !player.getWorld().getBlockState(BlockPos.ofFloored(player.getEyePos())).isOf(this);
-            } catch (ArrayIndexOutOfBoundsException fuckingshitexception) {
-                ImpenduitsCommon.LOGGER.warn("Shitass exception tried to trigger. I tried to fix this, but this janky hack should work to cover my bases.");
+            } catch (ArrayIndexOutOfBoundsException wackexception) {
+                ImpenduitsCommon.LOGGER.warn("Exception tried to trigger. I tried to fix this, but this janky hack should work to cover my bases.");
             }
-
         }
 
         return shouldGetShape ? super.getOutlineShape(state, world, pos, context) : VoxelShapes.empty();
