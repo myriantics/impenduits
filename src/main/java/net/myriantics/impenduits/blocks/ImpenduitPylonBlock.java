@@ -67,10 +67,12 @@ public class ImpenduitPylonBlock extends Block {
 
         Direction.Axis interactedAxis = hit.getSide().getAxis();
 
-        // require adventure mode players to interact with core opening sides
-        // allows restrictions on blanketcon server
-        if (!player.getAbilities().allowModifyWorld && (interactedAxis.test(state.get(FACING)) || interactedAxis.equals(state.get(AXIS))))
-            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        // bonk interactions if players are in adventure mode
+        if (!player.getAbilities().allowModifyWorld) return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+
+        // potential other interaction method that requires adventure mode players to interact with core opening sides
+        /* if (!player.getAbilities().allowModifyWorld && (interactedAxis.test(state.get(FACING)) || interactedAxis.equals(state.get(AXIS))))
+            return super.onUseWithItem(stack, state, world, pos, player, hand, hit); */
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
