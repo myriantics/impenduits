@@ -22,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ImpenduitsBlockLootTableProvider extends FabricBlockLootTableProvider {
-    public ImpenduitsBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
-        super(dataOutput, registryLookup);
+    public ImpenduitsBlockLootTableProvider(FabricDataOutput dataOutput) {
+        super(dataOutput);
     }
 
     @Override
@@ -32,12 +32,12 @@ public class ImpenduitsBlockLootTableProvider extends FabricBlockLootTableProvid
 
 
     @Override
-    public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer) {
+    public void accept(BiConsumer<Identifier, LootTable.Builder> biConsumer) {
         buildImpenduitPylonLootTable(biConsumer, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
-    public void buildImpenduitPylonLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer, Block pylon, Item powerCore) {
-        biConsumer.accept(pylon.getLootTableKey(), LootTable.builder()
+    public void buildImpenduitPylonLootTable(BiConsumer<Identifier, LootTable.Builder> biConsumer, Block pylon, Item powerCore) {
+        biConsumer.accept(pylon.getLootTableId(), LootTable.builder()
                 .pool(
                         LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1.0F))

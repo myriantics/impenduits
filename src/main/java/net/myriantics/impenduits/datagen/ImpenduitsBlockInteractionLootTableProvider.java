@@ -22,20 +22,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ImpenduitsBlockInteractionLootTableProvider extends SimpleFabricLootTableProvider {
-    public ImpenduitsBlockInteractionLootTableProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
-        super(output, registryLookup, LootContextTypes.BLOCK);
+    public ImpenduitsBlockInteractionLootTableProvider(FabricDataOutput output) {
+        super(output, LootContextTypes.BLOCK);
     }
 
     @Override
-    public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> lootTableBiConsumer) {
+    public void accept(BiConsumer<Identifier, LootTable.Builder> lootTableBiConsumer) {
         generateImpenduitPylonPowerCoreRemovalLootTable(lootTableBiConsumer, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
-    public void generateImpenduitPylonPowerCoreRemovalLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> exporter, Block pylon, Item powerCoreItem) {
+    public void generateImpenduitPylonPowerCoreRemovalLootTable(BiConsumer<Identifier, LootTable.Builder> exporter, Block pylon, Item powerCoreItem) {
 
         Identifier tableId = locatePylonPowerCoreRemovalId(pylon);
 
-        exporter.accept(RegistryKey.of(RegistryKeys.LOOT_TABLE, tableId), LootTable.builder()
+        exporter.accept(tableId, LootTable.builder()
                 .pool(
                         LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1.0f))

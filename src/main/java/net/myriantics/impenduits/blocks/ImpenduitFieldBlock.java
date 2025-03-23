@@ -13,9 +13,7 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.ReloadableRegistries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.server.Main;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -81,9 +79,8 @@ public class ImpenduitFieldBlock extends Block {
 
             // entities can walk on impenduit pylons if they have frost walker
             if (
-                    // fuck the rework to how enchants work lmao
-                    // bulls
-                    (EnchantmentHelper.getEquipmentLevel(livingEntity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(Enchantments.FROST_WALKER), livingEntity) > 0)
+                    // so much easier peepoHappy
+                    (EnchantmentHelper.hasFrostWalker(livingEntity))
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
                     && !livingEntity.isTouchingWaterOrRain()) {
@@ -95,7 +92,7 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    protected boolean canPathfindThrough(BlockState state, NavigationType type) {
+    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
         return false;
     }
 
@@ -133,7 +130,7 @@ public class ImpenduitFieldBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state) {
+    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 

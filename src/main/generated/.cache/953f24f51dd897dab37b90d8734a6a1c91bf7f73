@@ -1,4 +1,4 @@
-// 1.21.1	2025-02-25T23:30:43.765736	Impenduits/Tags for minecraft:block
-4e5ae669817ad913492e306f4e2fefc218d0f53d data\minecraft\tags\block\mineable\pickaxe.json
-ad601a85e623f88d6d83da829d36860363748f40 data\impenduits\tags\block\entity_rain_mimicking_blocks.json
-ad601a85e623f88d6d83da829d36860363748f40 data\minecraft\tags\block\impermeable.json
+// 1.20.1	2025-03-23T12:49:26.9074451	Impenduits/Tags for minecraft:block
+80bb3e7590a0509025cdefd64cacc92d4eabcc7a data\impenduits\tags\blocks\entity_rain_mimicking_blocks.json
+167a27e670214c68d8ffbcbc132078eb104055cb data\minecraft\tags\blocks\mineable\pickaxe.json
+80bb3e7590a0509025cdefd64cacc92d4eabcc7a data\minecraft\tags\blocks\impermeable.json

@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancement.criterion.CriterionConditions;
 import net.minecraft.advancement.criterion.ItemCriterion;
-import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.server.recipe.RecipeJsonProvider;
 import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.ShapedRecipe;
@@ -21,12 +21,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class ImpenduitsRecipeProvider extends FabricRecipeProvider {
-    public ImpenduitsRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
-        super(output, registriesFuture);
+    public ImpenduitsRecipeProvider(FabricDataOutput output) {
+        super(output);
     }
 
     @Override
-    public void generate(RecipeExporter recipeExporter) {
+    public void generate(Consumer<RecipeJsonProvider> recipeExporter) {
         ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, ImpenduitsCommon.IMPENDUIT_PYLON, 4)
                 .input('D', Items.DARK_PRISMARINE)
                 .input('L', Items.SEA_LANTERN)

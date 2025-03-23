@@ -23,8 +23,8 @@ public class ImpenduitsDispenserBehaviors {
             return new FallibleItemDispenserBehavior() {
                 @Override
                 protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
-                    World world = pointer.world();
-                    BlockPos targetPos = pointer.pos().offset(pointer.state().get(Properties.FACING), 1);
+                    World world = pointer.getWorld();
+                    BlockPos targetPos = pointer.getPos().offset(pointer.getBlockState().get(Properties.FACING), 1);
                     BlockState targetState = world.getBlockState(targetPos);
                     this.setSuccess(true);
 
@@ -52,8 +52,8 @@ public class ImpenduitsDispenserBehaviors {
             return new FallibleItemDispenserBehavior() {
                 @Override
                 protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
-                    World world = pointer.world();
-                    BlockPos targetPos = pointer.pos().offset(pointer.state().get(Properties.FACING), 1);
+                    World world = pointer.getWorld();
+                    BlockPos targetPos = pointer.getPos().offset(pointer.getBlockState().get(Properties.FACING), 1);
                     BlockState targetState = world.getBlockState(targetPos);
 
                     this.setSuccess(true);

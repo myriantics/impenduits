@@ -26,9 +26,11 @@ public abstract class DispenserBlockMixin {
 
     @ModifyExpressionValue(
             method = "dispense",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/DispenserBlock;getBehaviorForItem(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/block/dispenser/DispenserBehavior;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/DispenserBlock;getBehaviorForItem(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/block/dispenser/DispenserBehavior;")
     )
-    public DispenserBehavior impenduits$impenduitPylonDispenserOverride(DispenserBehavior original, @Local(argsOnly = true) ServerWorld world, @Local(argsOnly = true) BlockState dispenserState, @Local(argsOnly = true) BlockPos dispenserPos, @Local ItemStack dispenserStack) {
+    public DispenserBehavior impenduits$impenduitPylonDispenserOverride(DispenserBehavior original, @Local(argsOnly = true) ServerWorld world, @Local(argsOnly = true) BlockPos dispenserPos, @Local ItemStack dispenserStack) {
+        BlockState dispenserState = world.getBlockState(dispenserPos);
+
         Block targetedBlock = world.getBlockState(dispenserPos.offset(dispenserState.get(DispenserBlock.FACING), 1)).getBlock();
 
         DispenserBehavior pylonOverrideBehavior = null;

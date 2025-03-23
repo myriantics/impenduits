@@ -14,7 +14,6 @@ import net.minecraft.loot.LootTableReporter;
 import net.minecraft.loot.context.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.ReloadableRegistries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -62,13 +61,13 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         ItemStack handStack = player.getStackInHand(hand);
 
         Direction.Axis interactedAxis = hit.getSide().getAxis();
 
         // bonk interactions if players are in adventure mode
-        if (!player.getAbilities().allowModifyWorld) return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        if (!player.getAbilities().allowModifyWorld) return super.onUse(state, world, pos, player, hand, hit);
 
         // potential other interaction method that requires adventure mode players to interact with core opening sides
         /* if (!player.getAbilities().allowModifyWorld && (interactedAxis.test(state.get(FACING)) || interactedAxis.equals(state.get(AXIS))))
@@ -84,16 +83,16 @@ public class ImpenduitPylonBlock extends Block {
                     handStack.decrement(1);
                 }
             }
-            return ItemActionResult.SUCCESS;
+            return ActionResult.SUCCESS;
         } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 removePowerCore(world, pos, handStack);
             }
-            return ItemActionResult.SUCCESS;
+            return ActionResult.SUCCESS;
         }
 
-        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hand, hit);
     }
 
     // todo: add some functionality to this
@@ -337,7 +336,7 @@ public class ImpenduitPylonBlock extends Block {
         if (world instanceof ServerWorld serverWorld) {
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
-            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId))
+            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getLootManager().getLootTable(lootTableId)
                     .generateLoot(new LootContextParameterSet.Builder(serverWorld)
                             .add(LootContextParameters.TOOL, usedStack)
                             .add(LootContextParameters.BLOCK_STATE, pylonState)
