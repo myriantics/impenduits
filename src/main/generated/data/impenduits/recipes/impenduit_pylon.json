@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "minecraft:prismarine_bricks"
+    },
+    "C": {
+      "item": "minecraft:prismarine_crystals"
+    },
+    "D": {
+      "item": "minecraft:dark_prismarine"
+    },
+    "L": {
+      "item": "minecraft:sea_lantern"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "DLD",
+    "BDB"
+  ],
+  "result": {
+    "count": 4,
+    "item": "impenduits:impenduit_pylon"
+  },
+  "show_notification": true
+}
