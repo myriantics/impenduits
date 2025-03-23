@@ -65,6 +65,13 @@ public class ImpenduitPylonBlock extends Block {
     protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         ItemStack handStack = player.getStackInHand(hand);
 
+        Direction.Axis interactedAxis = hit.getSide().getAxis();
+
+        // require adventure mode players to interact with core opening sides
+        // allows restrictions on blanketcon server
+        if (!player.getAbilities().allowModifyWorld && (interactedAxis.test(state.get(FACING)) || interactedAxis.equals(state.get(AXIS))))
+            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
         if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE)
