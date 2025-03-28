@@ -3,6 +3,8 @@ package net.myriantics.impenduits.blocks;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.EnchantmentEffectComponentTypes;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
@@ -81,9 +83,7 @@ public class ImpenduitFieldBlock extends Block {
 
             // entities can walk on impenduit pylons if they have frost walker
             if (
-                    // fuck the rework to how enchants work lmao
-                    // bulls
-                    (EnchantmentHelper.getEquipmentLevel(livingEntity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(Enchantments.FROST_WALKER), livingEntity) > 0)
+                    EnchantmentHelper.hasAnyEnchantmentsIn(livingEntity.getEquippedStack(EquipmentSlot.FEET), ImpenduitsTags.IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
                     && !livingEntity.isTouchingWaterOrRain()) {

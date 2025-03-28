@@ -1,6 +1,7 @@
 package net.myriantics.impenduits.util;
 
 import net.minecraft.block.Block;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.registry.RegistryKeys;
@@ -24,4 +25,7 @@ public class ImpenduitsTags {
 
     public static final TagKey<Block> ENTITY_RAIN_MIMICKING_BLOCKS =
             TagKey.of(RegistryKeys.BLOCK, ImpenduitsCommon.locate("entity_rain_mimicking_blocks"));
+
+    public static final TagKey<Enchantment> IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS =
+            TagKey.of(RegistryKeys.ENCHANTMENT, ImpenduitsCommon.locate("impenduit_field_walkable"));
 }
