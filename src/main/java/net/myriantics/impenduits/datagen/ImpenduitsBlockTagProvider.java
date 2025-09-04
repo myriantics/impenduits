@@ -6,7 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
 import net.myriantics.impenduits.registry.ImpenduitsBlocks;
-import net.myriantics.impenduits.util.ImpenduitsTags;
+import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -26,9 +26,9 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
                 .add(ImpenduitsBlocks.IMPENDUIT_PYLON);
 
         // impenduits tags
-        getOrCreateTagBuilder(ImpenduitsTags.ENTITY_RAIN_MIMICKING_BLOCKS)
+        getOrCreateTagBuilder(ImpenduitsBlockTags.ENTITY_RAIN_MIMICKING_BLOCKS)
                 .add(ImpenduitsBlocks.IMPENDUIT_FIELD);
-        getOrCreateTagBuilder(ImpenduitsTags.DIRECTIONAL_OUTPUT_DISABLING)
+        getOrCreateTagBuilder(ImpenduitsBlockTags.DIRECTIONAL_OUTPUT_DISABLING)
                 .add(Blocks.HOPPER);
     }
 }

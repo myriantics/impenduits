@@ -4,18 +4,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTableReporter;
 import net.minecraft.loot.context.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.ReloadableRegistries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -32,10 +27,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
-import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
-import net.myriantics.impenduits.util.ImpenduitsTags;
+import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
+import net.myriantics.impenduits.tag.ImpenduitsItemTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -78,7 +73,7 @@ public class ImpenduitPylonBlock extends Block {
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
-        if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE)
+        if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE)
                 && !state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 insertPowerCore(world, pos);
@@ -87,7 +82,7 @@ public class ImpenduitPylonBlock extends Block {
                 }
             }
             return ItemActionResult.SUCCESS;
-        } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
+        } else if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
                 removePowerCore(world, pos, handStack, player, hit.getSide());
@@ -359,7 +354,7 @@ public class ImpenduitPylonBlock extends Block {
             Vec3d pylonCenterPos = pylonPos.toCenterPos();
 
             // make sure we have a side to work with and that there isn't an overriding block below
-            boolean shouldDirectionallyOutput = manualInteractionSide != null && !serverWorld.getBlockState(pylonPos.down()).isIn(ImpenduitsTags.DIRECTIONAL_OUTPUT_DISABLING);
+            boolean shouldDirectionallyOutput = manualInteractionSide != null && !serverWorld.getBlockState(pylonPos.down()).isIn(ImpenduitsBlockTags.DIRECTIONAL_OUTPUT_DISABLING);
 
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 

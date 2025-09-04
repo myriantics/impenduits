@@ -1,25 +1,21 @@
 package net.myriantics.impenduits.util;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.dispenser.DispenserBehavior;
 import net.minecraft.block.dispenser.FallibleItemDispenserBehavior;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.resource.LifecycledResourceManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPointer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
+import net.myriantics.impenduits.tag.ImpenduitsItemTags;
 
-public class ImpenduitsDispenserBehaviors {
+public abstract class ImpenduitsDispenserBehaviors {
 
     public static DispenserBehavior getPylonDispenserBehavior(ItemStack stack, ImpenduitPylonBlock pylonBlock) {
 
-        if (stack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE)) {
+        if (stack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE)) {
             return new FallibleItemDispenserBehavior() {
                 @Override
                 protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
@@ -48,7 +44,7 @@ public class ImpenduitsDispenserBehaviors {
             };
         }
 
-        if (stack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)) {
+        if (stack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)) {
             return new FallibleItemDispenserBehavior() {
                 @Override
                 protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {

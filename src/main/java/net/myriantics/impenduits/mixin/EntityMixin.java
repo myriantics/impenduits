@@ -6,10 +6,8 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
-import net.myriantics.impenduits.util.ImpenduitsTags;
+import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,7 +42,7 @@ public abstract class EntityMixin {
     )
     private void impenduits$checkForImpenduitField(CallbackInfo ci, @Local BlockState checkedState, @Share("interimIsInsideImpenduitField") LocalBooleanRef interimIsInsideImpenduitField) {
         if (!interimIsInsideImpenduitField.get()) {
-            interimIsInsideImpenduitField.set(checkedState.isIn(ImpenduitsTags.ENTITY_RAIN_MIMICKING_BLOCKS));
+            interimIsInsideImpenduitField.set(checkedState.isIn(ImpenduitsBlockTags.ENTITY_RAIN_MIMICKING_BLOCKS));
         }
     }
 

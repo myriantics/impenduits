@@ -1,27 +1,15 @@
 package net.myriantics.impenduits.blocks;
 
 import net.minecraft.block.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.ReloadableRegistries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.server.Main;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -37,7 +25,8 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
-import net.myriantics.impenduits.util.ImpenduitsTags;
+import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
+import net.myriantics.impenduits.tag.ImpenduitsEnchantmentTags;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
@@ -84,7 +73,7 @@ public class ImpenduitFieldBlock extends Block {
 
             // entities can walk on impenduit pylons if they have frost walker
             if (
-                    EnchantmentHelper.hasAnyEnchantmentsIn(livingEntity.getEquippedStack(EquipmentSlot.FEET), ImpenduitsTags.IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS)
+                    EnchantmentHelper.hasAnyEnchantmentsIn(livingEntity.getEquippedStack(EquipmentSlot.FEET), ImpenduitsEnchantmentTags.IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS)
                     && entityShapeContext.isAbove(shape, pos, false)
                     // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
                     && !livingEntity.isTouchingWaterOrRain()) {
@@ -138,14 +127,14 @@ public class ImpenduitFieldBlock extends Block {
                 // if the block is already replaceable, you're good
                 state.isReplaceable()
                         // if a block is specifically tagged as being replaceable, then go ahead.
-                        || state.isIn(ImpenduitsTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_ALLOWLIST)
+                        || state.isIn(ImpenduitsBlockTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_ALLOWLIST)
                         // if the block isn't a full block and is an instabreak, impenduits can replace it. this drops the block's loot!
                         || (state.getHardness(null, null) == 0f && !state.isFullCube(world, pos))
         )
                 // fields can't replace other fields
                 && !(state.getBlock() instanceof ImpenduitFieldBlock)
                 // denylist overrides any other conditions
-                && !state.isIn(ImpenduitsTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_DENYLIST);
+                && !state.isIn(ImpenduitsBlockTags.IMPENDUIT_FIELD_BLOCK_REPLACEMENT_DENYLIST);
     }
 
     @Override
