@@ -3,10 +3,11 @@ package net.myriantics.impenduits;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
-import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
-import net.myriantics.impenduits.registry.ImpenduitsItemGroups;
-import net.myriantics.impenduits.registry.ImpenduitsItems;
+import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.item.ImpenduitsItemGroups;
+import net.myriantics.impenduits.registry.item.ImpenduitsItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ public class ImpenduitsCommon implements ModInitializer {
         // registrations
         ImpenduitsBlocks.init();
         ImpenduitsItems.init();
+        ImpenduitsAdvancementCriteria.init();
 
         // static code
         ImpenduitsItemGroups.init();

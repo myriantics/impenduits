@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "activate_impenduit_field": {
+      "trigger": "impenduits:impenduit_field_activation"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.adventure.activate_impenduit_field.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "impenduits:impenduit_pylon"
+    },
+    "title": {
+      "translate": "advancements.adventure.activate_impenduit_field.title"
+    }
+  },
+  "requirements": [
+    [
+      "activate_impenduit_field"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

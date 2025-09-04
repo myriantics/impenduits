@@ -6,7 +6,8 @@
     "DispenserBlockMixin",
     "EntityMixin",
     "FlowableFluidMixin",
-    "PistonBlockMixin"
+    "PistonBlockMixin",
+    "TridentItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

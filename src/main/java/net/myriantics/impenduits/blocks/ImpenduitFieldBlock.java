@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.myriantics.impenduits.ImpenduitsCommon;
-import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import net.myriantics.impenduits.tag.ImpenduitsEnchantmentTags;
 

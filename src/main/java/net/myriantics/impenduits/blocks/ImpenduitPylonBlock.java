@@ -1,6 +1,7 @@
 package net.myriantics.impenduits.blocks;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
@@ -11,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -28,7 +30,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
-import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
+import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
+import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementTriggers;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import net.myriantics.impenduits.tag.ImpenduitsItemTags;
 import org.jetbrains.annotations.Nullable;
@@ -75,8 +79,14 @@ public class ImpenduitPylonBlock extends Block {
         // theyd also have to change the output loot table to match
         if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE)
                 && !state.get(POWER_SOURCE_PRESENT)) {
-            if (!world.isClient()) {
-                insertPowerCore(world, pos);
+            if (player instanceof ServerPlayerEntity serverPlayer) {
+
+                // pop field activation advancement if activation was successful
+                if (insertPowerCore(world, pos)) {
+                    ImpenduitsAdvancementTriggers.triggerImpenduitFieldActivation(serverPlayer);
+                }
+
+                // decrement power core stack if player is not creative
                 if (!player.isCreative()) {
                     handStack.decrement(1);
                 }
@@ -84,7 +94,14 @@ public class ImpenduitPylonBlock extends Block {
             return ItemActionResult.SUCCESS;
         } else if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
-            if (!world.isClient()) {
+            if (player instanceof ServerPlayerEntity serverPlayer) {
+                // this needs a custom advancement trigger because the vanilla one is called after onUseWithItem and ignores the original state before interaction
+                // it seemed like bad practice to call the vanilla one again right here so in goes the custom one.
+                // we can trust this because POWERED is only true in survival play if the pylon is actively supporting an Impenduit Field.
+                if (state.get(POWERED)) {
+                    ImpenduitsAdvancementCriteria.IMPENDUIT_FIELD_DEACTIVATION.trigger(serverPlayer);
+                }
+
                 removePowerCore(world, pos, handStack, player, hit.getSide());
             }
             return ItemActionResult.SUCCESS;
@@ -275,8 +292,12 @@ public class ImpenduitPylonBlock extends Block {
         return unconfirmedBlockPosList;
     }
 
-    private void spawnForcefield(BlockState state, World world, BlockPos pos) {
+    private boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
         ArrayList<BlockPos> affectedPositions = getAffectedPositions(world, state, pos);
+
+        if (affectedPositions.isEmpty()) {
+            return false;
+        }
 
         Direction pylonFacing = state.get(FACING);
 
@@ -323,9 +344,11 @@ public class ImpenduitPylonBlock extends Block {
                 world.scheduleBlockTick(updatedPos, fieldState.getBlock(), 1);
             }
         }
+
+        return true;
     }
 
-    public void insertPowerCore(World world, BlockPos pos) {
+    public boolean insertPowerCore(World world, BlockPos pos) {
         BlockState pylonState = world.getBlockState(pos);
 
         // trip sculk sensors
@@ -334,7 +357,7 @@ public class ImpenduitPylonBlock extends Block {
         world.updateComparators(pos, this);
         world.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
         world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, true));
-        spawnForcefield(pylonState.cycle(POWER_SOURCE_PRESENT), world, pos);
+        return spawnForcefield(pylonState.cycle(POWER_SOURCE_PRESENT), world, pos);
     }
 
     public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Direction manualInteractionSide) {

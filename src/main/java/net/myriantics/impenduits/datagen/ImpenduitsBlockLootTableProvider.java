@@ -14,7 +14,7 @@ import net.minecraft.predicate.StatePredicate;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;

@@ -1,10 +1,11 @@
-package net.myriantics.impenduits.registry;
+package net.myriantics.impenduits.registry.item;
 
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 public abstract class ImpenduitsItems {
 

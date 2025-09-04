@@ -7,7 +7,7 @@ import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.RegistryWrapper;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -1,0 +1,26 @@
+{
+  "parent": "impenduits:activate_impenduit_field",
+  "criteria": {
+    "deactivate_impenduit_field": {
+      "trigger": "impenduits:impenduit_field_deactivation"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.adventure.deactivate_impenduit_field.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:iron_pickaxe"
+    },
+    "title": {
+      "translate": "advancements.adventure.deactivate_impenduit_field.title"
+    }
+  },
+  "requirements": [
+    [
+      "deactivate_impenduit_field"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

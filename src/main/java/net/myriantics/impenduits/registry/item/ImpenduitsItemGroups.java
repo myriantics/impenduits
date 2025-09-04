@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.registry;
+package net.myriantics.impenduits.registry.item;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.ItemGroups;

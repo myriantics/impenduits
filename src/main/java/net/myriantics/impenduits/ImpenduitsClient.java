@@ -7,7 +7,7 @@ import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.ColorHelper;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 public class ImpenduitsClient implements ClientModInitializer {
     @Override

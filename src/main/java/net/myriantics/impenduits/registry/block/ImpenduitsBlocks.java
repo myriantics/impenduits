@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.registry;
+package net.myriantics.impenduits.registry.block;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;

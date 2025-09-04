@@ -16,7 +16,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.ImpenduitsCommon;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;

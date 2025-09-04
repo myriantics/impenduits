@@ -1,4 +1,12 @@
 {
   "block.impenduits.impenduit_pylon": "Impenduit Pylon",
-  "block.impenduits.impenduit_field": "Impenduit Field"
+  "block.impenduits.impenduit_field": "Impenduit Field",
+  "advancements.adventure.activate_impenduit_field.title": "Activate Field go brrr",
+  "advancements.adventure.activate_impenduit_field.description": "Activate properly mirrored Impenduit Pylons by right-clicking one with a Heart of the Sea",
+  "advancements.adventure.deactivate_impenduit_field.title": "Deactivate Field go brrr",
+  "advancements.adventure.deactivate_impenduit_field.description": "Deactivate an Impenduit Field by right-clicking with a Pickaxe to remove the power source.",
+  "advancements.adventure.walk_on_impenduit_field_with_frost_walker.title": "Hard Ice Bridge",
+  "advancements.adventure.walk_on_impenduit_field_with_frost_walker.description": "Walk on an Impenduit Field with Frost Walker",
+  "advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.title": "Wait, That's Illegal",
+  "advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.description": "Use a Riptide Trident in an ultrawarm dimension while touching an Impenduit Field"
 }

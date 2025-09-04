@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.registry;
+package net.myriantics.impenduits.registry.block;
 
 import net.minecraft.state.property.BooleanProperty;
 import net.myriantics.impenduits.ImpenduitsCommon;

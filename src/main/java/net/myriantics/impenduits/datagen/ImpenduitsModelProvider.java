@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
-import net.myriantics.impenduits.registry.ImpenduitsBlocks;
+import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 public class ImpenduitsModelProvider extends FabricModelProvider {
     public ImpenduitsModelProvider(FabricDataOutput output) {

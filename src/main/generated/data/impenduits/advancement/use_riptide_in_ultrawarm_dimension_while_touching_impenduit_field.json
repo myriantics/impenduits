@@ -1,0 +1,31 @@
+{
+  "parent": "impenduits:activate_impenduit_field",
+  "criteria": {
+    "use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field": {
+      "trigger": "impenduits:ultrawarm_impenduit_field_riptide"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.description"
+    },
+    "frame": "challenge",
+    "hidden": true,
+    "icon": {
+      "components": {
+        "minecraft:enchantment_glint_override": true
+      },
+      "count": 1,
+      "id": "minecraft:trident"
+    },
+    "title": {
+      "translate": "advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.title"
+    }
+  },
+  "requirements": [
+    [
+      "use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
