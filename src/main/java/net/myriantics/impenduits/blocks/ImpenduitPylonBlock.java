@@ -34,6 +34,7 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
+import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +43,8 @@ import java.util.ArrayList;
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
-    public static final BooleanProperty POWER_SOURCE_PRESENT = BooleanProperty.of("power_source_present");
-    public static final BooleanProperty POWERED = Properties.POWERED;
+    public static final BooleanProperty POWER_SOURCE_PRESENT = ImpenduitsBlockStateProperties.POWER_SOURCE_PRESENT;
+    public static final BooleanProperty POWERED = ImpenduitsBlockStateProperties.POWERED;
 
     public static final int MAX_IMPENDUIT_FIELD_SIZE = 24;
 

@@ -36,11 +36,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
-    public static final BooleanProperty FORMED = BooleanProperty.of("formed");
+    public static final BooleanProperty FORMED = ImpenduitsBlockStateProperties.FORMED;
 
     public ImpenduitFieldBlock(Settings settings) {
         super(settings);

@@ -3,6 +3,7 @@ package net.myriantics.impenduits;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
+import net.myriantics.impenduits.registry.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.registry.ImpenduitsBlocks;
 import net.myriantics.impenduits.registry.ImpenduitsItemGroups;
 import net.myriantics.impenduits.registry.ImpenduitsItems;
@@ -21,8 +22,14 @@ public class ImpenduitsCommon implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Impenduits!");
 
+        // static inits
+        ImpenduitsBlockStateProperties.init();
+
+        // registrations
         ImpenduitsBlocks.init();
         ImpenduitsItems.init();
+
+        // static code
         ImpenduitsItemGroups.init();
 
 		LOGGER.info("Impenduits has initialized!");
