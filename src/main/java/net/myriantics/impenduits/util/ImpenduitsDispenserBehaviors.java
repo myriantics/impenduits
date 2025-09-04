@@ -60,7 +60,7 @@ public class ImpenduitsDispenserBehaviors {
 
                     if (targetState.getBlock() instanceof ImpenduitPylonBlock pylonBlock) {
                         if (targetState.get(ImpenduitPylonBlock.POWER_SOURCE_PRESENT)) {
-                            pylonBlock.removePowerCore(world, targetPos, stack);
+                            pylonBlock.removePowerCore(world, targetPos, stack, null, null);
                         } else {
                             this.setSuccess(false);
                         }

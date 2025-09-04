@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -88,7 +89,7 @@ public class ImpenduitPylonBlock extends Block {
         } else if (handStack.isIn(ImpenduitsTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
                 && state.get(POWER_SOURCE_PRESENT)) {
             if (!world.isClient()) {
-                removePowerCore(world, pos, handStack);
+                removePowerCore(world, pos, handStack, player, hit.getSide());
             }
             return ItemActionResult.SUCCESS;
         }
@@ -324,32 +325,56 @@ public class ImpenduitPylonBlock extends Block {
         spawnForcefield(pylonState.cycle(POWER_SOURCE_PRESENT), world, pos);
     }
 
-    public void removePowerCore(World world, BlockPos pos, ItemStack usedStack) {
-        BlockState pylonState = world.getBlockState(pos);
+    public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Direction manualInteractionSide) {
+        BlockState pylonState = world.getBlockState(pylonPos);
 
         // trip sculk sensors
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pylonPos, GameEvent.Emitter.of(pylonState));
 
-        world.playSound(null, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
-        world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, false));
-        world.updateComparators(pos, this);
+        world.playSound(null, pylonPos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
+        world.setBlockState(pylonPos, pylonState.with(POWER_SOURCE_PRESENT, false));
+        world.updateComparators(pylonPos, this);
 
-        if (world instanceof ServerWorld serverWorld) {
+        // make sure we're on the server and that we either don't have a player or the player isn't creative before dropping items
+        // this is because the items dropping is annoying when testing in creative
+        if (world instanceof ServerWorld serverWorld && (player == null || !player.isCreative())) {
+
+            Vec3d pylonCenterPos = pylonPos.toCenterPos();
+
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
             ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId))
                     .generateLoot(new LootContextParameterSet.Builder(serverWorld)
                             .add(LootContextParameters.TOOL, usedStack)
                             .add(LootContextParameters.BLOCK_STATE, pylonState)
-                            .add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos))
+                            .add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pylonPos))
                             .build(LootContextTypes.BLOCK));
 
+            // drop all loot table outputs
             for (ItemStack stack : outputStacks) {
-                ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+                if (manualInteractionSide != null) {
+                    dropStack(serverWorld, pylonCenterPos.offset(manualInteractionSide, 0.7), new Vec3d(manualInteractionSide.getUnitVector()).multiply(1.5f / 20), stack);
+                } else {
+                    ItemScatterer.spawn(serverWorld, pylonCenterPos.getX(), pylonCenterPos.getY(), pylonCenterPos.getZ(), stack);
+                }
             }
         }
 
-        deactivatePylonRow(world, pos);
+        deactivatePylonRow(world, pylonPos);
+    }
+
+    private void dropStack(ServerWorld serverWorld, Vec3d position, Vec3d velocity, ItemStack stack) {
+        ItemEntity itemEntity = new ItemEntity(serverWorld,
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                stack,
+                velocity.getX(),
+                velocity.getY(),
+                velocity.getZ()
+        );
+
+        serverWorld.spawnEntity(itemEntity);
     }
 
     @Nullable
