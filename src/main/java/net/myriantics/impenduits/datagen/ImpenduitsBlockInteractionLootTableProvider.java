@@ -16,7 +16,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.ImpenduitsCommon;
-import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
+import net.myriantics.impenduits.registry.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -28,7 +28,7 @@ public class ImpenduitsBlockInteractionLootTableProvider extends SimpleFabricLoo
 
     @Override
     public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> lootTableBiConsumer) {
-        generateImpenduitPylonPowerCoreRemovalLootTable(lootTableBiConsumer, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
+        generateImpenduitPylonPowerCoreRemovalLootTable(lootTableBiConsumer, ImpenduitsBlocks.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
     public void generateImpenduitPylonPowerCoreRemovalLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> exporter, Block pylon, Item powerCoreItem) {

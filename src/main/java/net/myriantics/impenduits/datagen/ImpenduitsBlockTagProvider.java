@@ -2,12 +2,9 @@ package net.myriantics.impenduits.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.myriantics.impenduits.ImpenduitsCommon;
+import net.myriantics.impenduits.registry.ImpenduitsBlocks;
 import net.myriantics.impenduits.util.ImpenduitsTags;
 
 import java.util.concurrent.CompletableFuture;
@@ -21,12 +18,12 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
 
         getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
-                .add(ImpenduitsCommon.IMPENDUIT_PYLON);
+                .add(ImpenduitsBlocks.IMPENDUIT_PYLON);
 
         getOrCreateTagBuilder(BlockTags.IMPERMEABLE)
-                .add(ImpenduitsCommon.IMPENDUIT_FIELD);
+                .add(ImpenduitsBlocks.IMPENDUIT_FIELD);
 
         getOrCreateTagBuilder(ImpenduitsTags.ENTITY_RAIN_MIMICKING_BLOCKS)
-                .add(ImpenduitsCommon.IMPENDUIT_FIELD);
+                .add(ImpenduitsBlocks.IMPENDUIT_FIELD);
     }
 }

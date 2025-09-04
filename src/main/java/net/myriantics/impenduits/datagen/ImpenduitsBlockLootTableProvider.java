@@ -9,14 +9,12 @@ import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.condition.BlockStatePropertyLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.*;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.predicate.StatePredicate;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
-import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
+import net.myriantics.impenduits.registry.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -33,7 +31,7 @@ public class ImpenduitsBlockLootTableProvider extends FabricBlockLootTableProvid
 
     @Override
     public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer) {
-        buildImpenduitPylonLootTable(biConsumer, ImpenduitsCommon.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
+        buildImpenduitPylonLootTable(biConsumer, ImpenduitsBlocks.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
     public void buildImpenduitPylonLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer, Block pylon, Item powerCore) {

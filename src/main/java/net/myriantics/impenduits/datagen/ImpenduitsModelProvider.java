@@ -9,6 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
+import net.myriantics.impenduits.registry.ImpenduitsBlocks;
 
 public class ImpenduitsModelProvider extends FabricModelProvider {
     public ImpenduitsModelProvider(FabricDataOutput output) {
@@ -22,30 +23,30 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
     }
 
     private void registerImpenduitFieldBlock(BlockStateModelGenerator generator) {
-        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsCommon.IMPENDUIT_FIELD, ImpenduitsCommon.locate("block/impenduit_field"));
+        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsBlocks.IMPENDUIT_FIELD, ImpenduitsCommon.locate("block/impenduit_field"));
 
         generator.blockStateCollector.accept(supplier);
     }
 
     private void registerImpenduitPylonBlock(BlockStateModelGenerator generator) {
-        BlockStateVariant singleton_powered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_powered_core"));
-        BlockStateVariant singleton_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
-        BlockStateVariant singleton_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
-        BlockStateVariant singleton_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
-        BlockStateVariant axis_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_no_core_z"));
-        BlockStateVariant axis_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
-        BlockStateVariant axis_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_core_z"));
-        BlockStateVariant axis_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_core_z"));
-        BlockStateVariant axis_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_no_core_x"));
-        BlockStateVariant axis_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_x"));
-        BlockStateVariant axis_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_powered_core_x"));
-        BlockStateVariant axis_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
+        BlockStateVariant singleton_powered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_core"));
+        BlockStateVariant singleton_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
+        BlockStateVariant singleton_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
+        BlockStateVariant singleton_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
+        BlockStateVariant axis_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_z"));
+        BlockStateVariant axis_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
+        BlockStateVariant axis_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_z"));
+        BlockStateVariant axis_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_z"));
+        BlockStateVariant axis_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_x"));
+        BlockStateVariant axis_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_x"));
+        BlockStateVariant axis_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_x"));
+        BlockStateVariant axis_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
 
-        generator.registerParentedItemModel(ImpenduitsCommon.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsCommon.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
+        generator.registerParentedItemModel(ImpenduitsBlocks.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
 
         BlockStateVariantMap.QuadrupleProperty<Direction, Direction.Axis, Boolean, Boolean> map = BlockStateVariantMap.create(ImpenduitPylonBlock.FACING, ImpenduitPylonBlock.AXIS, ImpenduitPylonBlock.POWERED, ImpenduitPylonBlock.POWER_SOURCE_PRESENT);
 
-        VariantsBlockStateSupplier supplier = VariantsBlockStateSupplier.create(ImpenduitsCommon.IMPENDUIT_PYLON);
+        VariantsBlockStateSupplier supplier = VariantsBlockStateSupplier.create(ImpenduitsBlocks.IMPENDUIT_PYLON);
 
         // iterate through all facing values
         for (Direction facing : Direction.values()) {
