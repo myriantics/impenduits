@@ -284,31 +284,47 @@ public class ImpenduitPylonBlock extends Block {
 
         Direction pylonFacing = state.get(FACING);
 
+        // Prepare the field state - we only need to do this once for the whole field
+        BlockState fieldState = FIELD_BLOCK.getDefaultState()
+                .with(AXIS, pylonFacing.getAxis())
+                // This signifies the field is still forming, and temporarily disables field self-destruction on updates.
+                .with(ImpenduitFieldBlock.FORMED, false);
+
+
         for (BlockPos updatedPos : affectedPositions) {
             BlockState updatedState = world.getBlockState(updatedPos);
 
             // filter out impenduit pylons so that they aren't turned to impenduit fields
             // the only blocks that will be in this list are the pylons and replaceable blocks, so this is a fine assumption to make.
             if (updatedState.isOf(this)) {
-                // update impenduit state to reflect it being powered
+                // Prepare the pylon state.
+                BlockState pylonState = updatedState
+                        // only set it to powered if there is more than one element!
+                        // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
+                        .with(POWERED, affectedPositions.size() > 1)
+                        // update power source state if you need to, but don't overwrite it if it's already present
+                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT));
 
-                world.setBlockState(updatedPos, updatedState
-                                // only set it to powered if there is more than one element!
-                                // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
-                                .with(POWERED, affectedPositions.size() > 1)
-                                // update power source state if you need to, but don't overwrite it if it's already present
-                                .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT)),
-                        Block.NOTIFY_LISTENERS | FORCE_STATE);
+                // Replace the pylon state.
+                world.setBlockState(
+                        updatedPos,
+                        pylonState
+                );
 
             } else {
-                // update replaced blocks with impenduit fields oriented on the axis of the facing direction of origin impenduit
-                // this forces state to prevent field blocks from updating themselves while they're being placed  - i'm looking at you, redstone dust
+                // Drop original block's loot.
                 Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
-                world.setBlockState(updatedPos, FIELD_BLOCK.getDefaultState().with(AXIS, pylonFacing.getAxis())
-                                .with(ImpenduitFieldBlock.FORMED, false),
-                        Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
-                // schedule field to be updated so that it changes its state - this breaks blocks such as sugarcane by letting them know they're in an invalid state
-                world.scheduleBlockTick(updatedPos, FIELD_BLOCK, 1);
+
+                // Place the field.
+                world.setBlockState(
+                        updatedPos,
+                        fieldState
+                );
+
+                // Schedule field to be updated so that it changes its state, allowing it to be destroyed on neighbor update
+                // This is a safety measure to prevent certain fucky blocks from destroying Impenduit Fields during the formation stage.
+                // (ahem. redstone dust, i'm looking at you.)
+                world.scheduleBlockTick(updatedPos, fieldState.getBlock(), 1);
             }
         }
     }

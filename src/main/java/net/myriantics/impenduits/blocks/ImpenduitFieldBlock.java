@@ -106,6 +106,21 @@ public class ImpenduitFieldBlock extends Block {
 
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        Direction.Axis axis = state.get(AXIS);
+
+        // validate that the field is supported before confirming formation
+        for (Direction.AxisDirection axisDirection : Direction.AxisDirection.values()) {
+            BlockPos supportingPos = pos.offset(Direction.from(axis, axisDirection));
+            BlockState supportingState = world.getBlockState(supportingPos);
+
+            // if either side of the field is unsupported, break field and exit method
+            if (!canStateSupportField(state, supportingState)) {
+                world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                return;
+            }
+        }
+
+        // if both sides were supported, we can confirm a successful formation.
         world.setBlockState(pos, state.with(FORMED, true));
     }
 
@@ -141,8 +156,9 @@ public class ImpenduitFieldBlock extends Block {
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         Direction.Axis updatedFieldAxis = state.get(AXIS);
 
+        // only update state if field has formed
         // if the update is inline with the field column, run this
-        if (!world.isClient() && direction.getAxis().equals(updatedFieldAxis) && !canStateSupportField(state, neighborState)) {
+        if (state.get(FORMED) && !world.isClient() && direction.getAxis().equals(updatedFieldAxis) && !canStateSupportField(state, neighborState)) {
             world.setBlockState(pos, Blocks.AIR.getDefaultState(), NOTIFY_ALL);
 
             // only play a few sounds, instead of every overwritten block
