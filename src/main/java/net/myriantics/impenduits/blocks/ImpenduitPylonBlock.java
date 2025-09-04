@@ -358,6 +358,9 @@ public class ImpenduitPylonBlock extends Block {
 
             Vec3d pylonCenterPos = pylonPos.toCenterPos();
 
+            // make sure we have a side to work with and that there isn't an overriding block below
+            boolean shouldDirectionallyOutput = manualInteractionSide != null && !serverWorld.getBlockState(pylonPos.down()).isIn(ImpenduitsTags.DIRECTIONAL_OUTPUT_DISABLING);
+
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
             ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId))
@@ -369,7 +372,7 @@ public class ImpenduitPylonBlock extends Block {
 
             // drop all loot table outputs
             for (ItemStack stack : outputStacks) {
-                if (manualInteractionSide != null) {
+                if (shouldDirectionallyOutput) {
                     dropStack(serverWorld, pylonCenterPos.offset(manualInteractionSide, 0.7), new Vec3d(manualInteractionSide.getUnitVector()).multiply(1.5f / 20), stack);
                 } else {
                     ItemScatterer.spawn(serverWorld, pylonCenterPos.getX(), pylonCenterPos.getY(), pylonCenterPos.getZ(), stack);

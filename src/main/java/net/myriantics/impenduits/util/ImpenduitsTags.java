@@ -26,6 +26,9 @@ public class ImpenduitsTags {
     public static final TagKey<Block> ENTITY_RAIN_MIMICKING_BLOCKS =
             TagKey.of(RegistryKeys.BLOCK, ImpenduitsCommon.locate("entity_rain_mimicking_blocks"));
 
+    public static final TagKey<Block> DIRECTIONAL_OUTPUT_DISABLING =
+            TagKey.of(RegistryKeys.BLOCK, ImpenduitsCommon.locate("directional_output_disabling"));
+
     public static final TagKey<Enchantment> IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS =
             TagKey.of(RegistryKeys.ENCHANTMENT, ImpenduitsCommon.locate("impenduit_field_walkable"));
 }

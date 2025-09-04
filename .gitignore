@@ -28,6 +28,9 @@ bin/
 
 *.DS_Store
 
+# fucken datagen bs
+src/main/generated/.cache
+
 # fabric
 
 run/
