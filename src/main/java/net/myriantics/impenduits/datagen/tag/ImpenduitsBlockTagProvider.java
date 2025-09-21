@@ -28,7 +28,5 @@ public class ImpenduitsBlockTagProvider extends FabricTagProvider.BlockTagProvid
         // impenduits tags
         getOrCreateTagBuilder(ImpenduitsBlockTags.ENTITY_RAIN_MIMICKING_BLOCKS)
                 .add(ImpenduitsBlocks.IMPENDUIT_FIELD);
-        getOrCreateTagBuilder(ImpenduitsBlockTags.DIRECTIONAL_OUTPUT_DISABLING)
-                .add(Blocks.HOPPER);
     }
 }
