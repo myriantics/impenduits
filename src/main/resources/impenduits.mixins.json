@@ -8,12 +8,15 @@
     "EntityMixin",
     "FlowableFluidMixin",
     "PistonBlockMixin",
-    "TridentItemMixin"
+    "TridentItemMixin",
+    "rain_blocking.HeightmapTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "InGameOverlayRendererMixin"
+    "InGameOverlayRendererMixin",
+    "rain_blocking.RainSplashParticleMixin",
+    "rain_blocking.WorldRendererMixin"
   ]
 }
