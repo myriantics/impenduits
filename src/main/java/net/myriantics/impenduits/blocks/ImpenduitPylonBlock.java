@@ -25,21 +25,21 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.block.NeighborUpdater;
 import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.registry.ImpenduitsGameRules;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementTriggers;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
-import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import net.myriantics.impenduits.tag.ImpenduitsItemTags;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
@@ -101,7 +101,7 @@ public class ImpenduitPylonBlock extends Block {
                     ImpenduitsAdvancementCriteria.IMPENDUIT_FIELD_DEACTIVATION.trigger(serverPlayer);
                 }
 
-                removePowerCore(world, pos, handStack, player, hit.getSide());
+                removePowerCore(world, pos, handStack, player, hit.getPos());
             }
             return ItemActionResult.SUCCESS;
         }
@@ -464,7 +464,7 @@ public class ImpenduitPylonBlock extends Block {
         }
     }
 
-    public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Direction manualInteractionSide) {
+    public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Vec3d manualInteractionPos) {
         BlockState pylonState = world.getBlockState(pylonPos);
 
         // trip sculk sensors
@@ -477,11 +477,42 @@ public class ImpenduitPylonBlock extends Block {
         // make sure we're on the server and that we either don't have a player or the player isn't creative before dropping items
         // this is because the items dropping is annoying when testing in creative
         if (world instanceof ServerWorld serverWorld && (player == null || !player.isCreative())) {
-
             Vec3d pylonCenterPos = pylonPos.toCenterPos();
 
-            // make sure we have a side to work with and that there isn't an overriding block below
-            boolean shouldDirectionallyOutput = manualInteractionSide != null && !serverWorld.getBlockState(pylonPos.down()).isIn(ImpenduitsBlockTags.DIRECTIONAL_OUTPUT_DISABLING);
+            Direction pylonFacing = pylonState.get(FACING);
+            Direction.Axis pylonAxis = pylonState.get(AXIS);
+
+            // output direction is null for dispenser-automated interactions
+            @Nullable Direction outputDirection = null;
+
+            // output direction is the closest power core slot to the clicked position for manual interactions.
+            if (player != null && manualInteractionPos != null) {
+                Vector3f relativeInteractionPos = pylonCenterPos.subtract(manualInteractionPos).toVector3f();
+
+                Direction closestDirection = null;
+                for (Direction direction : Direction.values()) {
+                    // ignore any slots that aren't core output slots
+                    if (direction.getAxis().equals(pylonFacing.getAxis()) || direction.getAxis().equals(pylonAxis)) {
+                        continue;
+                    }
+
+                    BlockPos neighborPos = pylonPos.offset(direction);
+                    BlockState neighborState = world.getBlockState(neighborPos);
+
+                    // make sure neighbor position is unobstructed
+                    if (neighborState.isSideSolidFullSquare(world, neighborPos, direction.getOpposite())) {
+                        continue;
+                    }
+
+                    // if the closest direction hasn't been set yet, or it's closer than the last direction's distance, overwrite it
+                    if (closestDirection == null || closestDirection.getUnitVector().distance(relativeInteractionPos) < direction.getUnitVector().distance(relativeInteractionPos)) {
+                        closestDirection = direction;
+                    }
+                }
+
+                // once we've found the closest core slot direction to interaction point, set the output direction
+                outputDirection = closestDirection;
+            }
 
             Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
@@ -494,8 +525,8 @@ public class ImpenduitPylonBlock extends Block {
 
             // drop all loot table outputs
             for (ItemStack stack : outputStacks) {
-                if (shouldDirectionallyOutput) {
-                    dropStack(serverWorld, pylonCenterPos.offset(manualInteractionSide, 0.7), new Vec3d(manualInteractionSide.getUnitVector()).multiply(1.5f / 20), stack);
+                if (outputDirection != null) {
+                    dropStack(serverWorld, pylonCenterPos.offset(outputDirection, 0.7), new Vec3d(outputDirection.getUnitVector()).multiply(1.5f / 20), stack);
                 } else {
                     ItemScatterer.spawn(serverWorld, pylonCenterPos.getX(), pylonCenterPos.getY(), pylonCenterPos.getZ(), stack);
                 }
