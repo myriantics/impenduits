@@ -25,6 +25,6 @@ public abstract class ImpenduitsStatistics {
     }
 
     public static void init() {
-        ImpenduitsCommon.LOGGER.info("Initialized Impenduits' Statistics!");
+        ImpenduitsCommon.LOGGER.info("Registered Impenduits' Statistics!");
     }
 }
