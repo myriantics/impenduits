@@ -109,12 +109,6 @@ public class ImpenduitPylonBlock extends Block {
         return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
     }
 
-    // todo: add some functionality to this
-    @Override
-    public BlockState rotate(BlockState state, BlockRotation rotation) {
-        return super.rotate(state, rotation);
-    }
-
     @Override
     public BlockState getStateForNeighborUpdate(BlockState pylonState, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pylonPos, BlockPos neighborPos) {
         Direction pylonFacing = pylonState.get(FACING);
@@ -389,10 +383,11 @@ public class ImpenduitPylonBlock extends Block {
     }
 
     private boolean spawnForcefield(BlockState state, ServerWorld serverWorld, BlockPos pos) {
-        ArrayList<BlockPos> affectedPositions = getAffectedPositions(serverWorld, state, pos);
+        List<BlockPos> affectedPositions = getAffectedPositions(serverWorld, state, pos);
 
+        // if field formation failed, add origin pos so it gets updated
         if (affectedPositions.isEmpty()) {
-            return false;
+            affectedPositions = List.of(pos);
         }
 
         Direction pylonFacing = state.get(FACING);
@@ -441,7 +436,7 @@ public class ImpenduitPylonBlock extends Block {
             }
         }
 
-        return true;
+        return affectedPositions.size() > 1;
     }
 
     public boolean insertPowerCore(ServerWorld serverWorld, BlockPos pos) {
