@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -30,6 +31,7 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.datagen.loot_table.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.registry.ImpenduitsGameRules;
+import net.myriantics.impenduits.registry.ImpenduitsStatistics;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementTriggers;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
@@ -81,8 +83,11 @@ public class ImpenduitPylonBlock extends Block {
                 // pop field activation advancement if activation was successful
                 if (insertPowerCore((ServerWorld) world, pos)) {
                     ImpenduitsAdvancementTriggers.triggerImpenduitFieldActivation(serverPlayer);
+                    serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_ACTIVATED);
                 }
 
+                serverPlayer.incrementStat(Stats.USED.getOrCreateStat(handStack.getItem()));
+                serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_INSERTED);
                 // decrement power core stack if player is not creative
                 if (!player.isCreative()) {
                     handStack.decrement(1);
@@ -97,8 +102,11 @@ public class ImpenduitPylonBlock extends Block {
                 // we can trust this because POWERED is only true in survival play if the pylon is actively supporting an Impenduit Field.
                 if (state.get(POWERED)) {
                     ImpenduitsAdvancementCriteria.IMPENDUIT_FIELD_DEACTIVATION.trigger(serverPlayer);
+                    serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_DEACTIVATED);
                 }
 
+                serverPlayer.incrementStat(Stats.USED.getOrCreateStat(handStack.getItem()));
+                serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_REMOVED);
                 removePowerCore(world, pos, handStack, player, hit.getPos());
             }
             return ItemActionResult.SUCCESS;

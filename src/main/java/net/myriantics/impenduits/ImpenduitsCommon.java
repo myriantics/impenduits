@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
 import net.myriantics.impenduits.registry.ImpenduitsGameRules;
+import net.myriantics.impenduits.registry.ImpenduitsStatistics;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
@@ -36,6 +37,7 @@ public class ImpenduitsCommon implements ModInitializer {
         ImpenduitsItems.init();
         ImpenduitsAdvancementCriteria.init();
         ImpenduitsGameRules.init();
+        ImpenduitsStatistics.init();
 
         // static code
         ImpenduitsItemGroups.init();
