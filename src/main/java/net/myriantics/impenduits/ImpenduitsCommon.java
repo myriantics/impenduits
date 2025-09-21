@@ -3,6 +3,7 @@ package net.myriantics.impenduits;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
+import net.myriantics.impenduits.registry.ImpenduitsGameRules;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
@@ -19,6 +20,10 @@ public class ImpenduitsCommon implements ModInitializer {
 		return Identifier.of(MOD_ID, name);
 	}
 
+    public static String locateAlt(String name) {
+		return MOD_ID + "." + name;
+	}
+
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Initializing Impenduits!");
@@ -30,6 +35,7 @@ public class ImpenduitsCommon implements ModInitializer {
         ImpenduitsBlocks.init();
         ImpenduitsItems.init();
         ImpenduitsAdvancementCriteria.init();
+        ImpenduitsGameRules.init();
 
         // static code
         ImpenduitsItemGroups.init();

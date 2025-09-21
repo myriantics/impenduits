@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.dispenser.DispenserBehavior;
 import net.minecraft.block.dispenser.FallibleItemDispenserBehavior;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPointer;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +20,7 @@ public abstract class ImpenduitsDispenserBehaviors {
             return new FallibleItemDispenserBehavior() {
                 @Override
                 protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
-                    World world = pointer.world();
+                    ServerWorld world = pointer.world();
                     BlockPos targetPos = pointer.pos().offset(pointer.state().get(Properties.FACING), 1);
                     BlockState targetState = world.getBlockState(targetPos);
                     this.setSuccess(true);

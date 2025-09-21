@@ -1,7 +1,6 @@
 package net.myriantics.impenduits.blocks;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonBehavior;
@@ -30,6 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
 import net.myriantics.impenduits.datagen.ImpenduitsBlockInteractionLootTableProvider;
+import net.myriantics.impenduits.registry.ImpenduitsGameRules;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementTriggers;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
@@ -38,14 +38,14 @@ import net.myriantics.impenduits.tag.ImpenduitsItemTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class ImpenduitPylonBlock extends Block {
     public static final DirectionProperty FACING = Properties.FACING;
     public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
     public static final BooleanProperty POWER_SOURCE_PRESENT = ImpenduitsBlockStateProperties.POWER_SOURCE_PRESENT;
     public static final BooleanProperty POWERED = ImpenduitsBlockStateProperties.POWERED;
-
-    public static final int MAX_IMPENDUIT_FIELD_SIZE = 24;
 
     public final ImpenduitFieldBlock FIELD_BLOCK;
 
@@ -77,12 +77,11 @@ public class ImpenduitPylonBlock extends Block {
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
-        if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE)
-                && !state.get(POWER_SOURCE_PRESENT)) {
+        if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE) && !state.get(POWER_SOURCE_PRESENT)) {
             if (player instanceof ServerPlayerEntity serverPlayer) {
 
                 // pop field activation advancement if activation was successful
-                if (insertPowerCore(world, pos)) {
+                if (insertPowerCore((ServerWorld) world, pos)) {
                     ImpenduitsAdvancementTriggers.triggerImpenduitFieldActivation(serverPlayer);
                 }
 
@@ -129,9 +128,104 @@ public class ImpenduitPylonBlock extends Block {
         return super.getStateForNeighborUpdate(pylonState, direction, neighborState, world, pylonPos, neighborPos);
     }
 
+    private ArrayList<BlockPos> getAffectedPositions(ServerWorld serverWorld, BlockState originPylonState, BlockPos originPylonPos) {
+        ArrayList<BlockPos> affectedPositions = new ArrayList<>();
+
+        // these are stored separately because the max pylon column length cannot change
+        // while the max field column length can change if the field is smaller than the max
+        int maxPylonColumnLength = serverWorld.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH);
+        int maxFieldColumnLength = maxPylonColumnLength;
+
+        final Direction.Axis pylonColumnAxis = originPylonState.get(AXIS);
+
+        // this being not null indicates that a pillar has failed to form
+        // selectedPylonPos will now move by 1 block each iteration in this direction.
+        Direction formationDirectionAfterFailure = null;
+        boolean isOriginPylonSelected = true;
+        BlockPos.Mutable selectedPylonPos = originPylonPos.mutableCopy();
+
+        for (
+                int offset = 0;
+                offset < maxPylonColumnLength;
+                offset++
+        ) {
+            // figure out which direction to move the selected position
+            Direction offsetDirection = formationDirectionAfterFailure == null
+                    ? Direction.from(pylonColumnAxis, offset % 2 == 0 ? Direction.AxisDirection.POSITIVE : Direction.AxisDirection.NEGATIVE)
+                    : formationDirectionAfterFailure;
+
+            selectedPylonPos.move(
+                    offsetDirection,
+                    formationDirectionAfterFailure == null
+                            // when it hasn't failed, we want to flip back and forth
+                            ? offset
+                            // when it has failed, we move by 1 block each time in the designated direction
+                            : 1
+            );
+
+            // check to update origin pylon selection status.
+            if (isOriginPylonSelected) {
+                isOriginPylonSelected = selectedPylonPos.equals(originPylonPos);
+            }
+
+            BlockState selectedPylonState = serverWorld.getBlockState(selectedPylonPos);
+
+            // Make sure the selected pylon is compatible with the origin pylon
+            if (!areNeighboringPylonsCompatible(originPylonState, selectedPylonState)) {
+                // Break out of the loop if we hit an error on both sides
+                if (formationDirectionAfterFailure != null) {
+                    break;
+                } else {
+                    // If we haven't failed before, define new formation direction, reset selected pos, and continue looping
+                    formationDirectionAfterFailure = offsetDirection.getOpposite();
+                    selectedPylonPos.move(offsetDirection.getOpposite(), offset);
+                    // decrement the offset because the failed column shouldn't count towards total
+                    offset--;
+                    continue;
+                }
+            }
+
+            // gather field column positions if all previous checks pass
+            // null value or empty list indicates failure
+            ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(
+                    serverWorld,
+                    selectedPylonPos.toImmutable(),
+                    originPylonState,
+                    maxFieldColumnLength,
+                    isOriginPylonSelected
+            );
+
+            if (fieldColumnPositions != null && !fieldColumnPositions.isEmpty()) {
+                // if we have collected positions, update the list to include them
+                affectedPositions.addAll(fieldColumnPositions);
+
+                // cap off field column length and update flipped position
+                if (isOriginPylonSelected) {
+                    maxFieldColumnLength = fieldColumnPositions.size() - 2;
+                }
+            } else {
+                if (isOriginPylonSelected || formationDirectionAfterFailure != null) {
+                    // End blockpos collection if column check fails on the origin pylon - or if it's already failed once
+                    break;
+                } else {
+                    // If we haven't failed before, define new formation direction, reset selected pos, and continue looping
+                    formationDirectionAfterFailure = offsetDirection.getOpposite();
+                    selectedPylonPos.move(offsetDirection.getOpposite(), offset);
+                    // decrement the offset because the failed column shouldn't count towards total
+                    offset--;
+                    continue;
+                }
+            }
+        }
+
+        // Return all the positions to be updated!
+        return affectedPositions;
+    }
+
+    /*
     private ArrayList<BlockPos> getAffectedPositions(World world, BlockState originState, BlockPos originPos) {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
-        int maxFieldColumnLength = MAX_IMPENDUIT_FIELD_SIZE;
+        int maxFieldColumnLength = world.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH);
 
         final Direction.Axis originPylonAxis = originState.get(AXIS);
         final boolean isSingleton = originState.get(FACING).getAxis().equals(originPylonAxis);
@@ -145,7 +239,7 @@ public class ImpenduitPylonBlock extends Block {
         // stop having to recompute if the current pylon is the origin or not
         boolean isOriginPylonSelected = true;
 
-        for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE; neighborOffset++) {
+        for (int neighborOffset = 0; neighborOffset < world.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH); neighborOffset++) {
             BlockPos targetNeighboringPylonPos = pylonMutableCheckingSourcePos.offset(checkingDirection, neighborOffset);
             BlockState targetNeighborState = world.getBlockState(targetNeighboringPylonPos);
 
@@ -203,7 +297,7 @@ public class ImpenduitPylonBlock extends Block {
         }
 
         return affectedPositions;
-    }
+    }*/
 
     public void deactivatePylonRow(World world, BlockPos originPos) {
         BlockState originState = world.getBlockState(originPos);
@@ -219,7 +313,7 @@ public class ImpenduitPylonBlock extends Block {
 
             // iterate through the row of pylons and unpower each one
             // the fields will deactivate themselves due to the block update
-            for (int neighborOffset = 0; neighborOffset < MAX_IMPENDUIT_FIELD_SIZE; neighborOffset++) {
+            for (int neighborOffset = 0; neighborOffset <= world.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH); neighborOffset++) {
                 BlockPos targetNeighborPos = originPos.offset(checkingDirection, neighborOffset);
                 BlockState targetNeighborState = world.getBlockState(targetNeighborPos);
 
@@ -250,50 +344,52 @@ public class ImpenduitPylonBlock extends Block {
         }
     }
 
-    private ArrayList<BlockPos> getFieldColumnPositions(World world, BlockPos targetNeighboringPylonPos, BlockState originState, int boundedFieldLength, boolean isOriginPylonSelected) {
-        // list used to store blockpos that need to be confirmed as supported before committing to the big list
-        ArrayList<BlockPos> unconfirmedBlockPosList = new ArrayList<>();
+    private @Nullable ArrayList<BlockPos> getFieldColumnPositions(World world, BlockPos columnOriginPos, BlockState columnOriginState, int boundedFieldLength, boolean isOriginPylonSelected) {
+        // list used to store column positions that need to be confirmed as supported before committing to the big list
+        ArrayList<BlockPos> columnPositions = new ArrayList<>();
 
-        int facingDirOffset;
+        // add the origin pylon to the list first because we know it's valid already
+        columnPositions.add(columnOriginPos);
 
-        // check all blocks in front of selected pylon
-        for (facingDirOffset = 1; facingDirOffset <= boundedFieldLength; facingDirOffset++) {
-            BlockPos targetPos = targetNeighboringPylonPos.offset(originState.get(FACING), facingDirOffset);
+        // the opposing pylon is checked by this loop, so the field length must be bumped by 1
+        for (int offset = 1; offset <= boundedFieldLength + 1; offset++) {
+            BlockPos targetPos = columnOriginPos.offset(columnOriginState.get(FACING), offset);
             BlockState targetState = world.getBlockState(targetPos);
 
             // we always want to add the target block to the list - if this operation fails for any reason it clears the list, so no reason not to
-            unconfirmedBlockPosList.add(targetPos);
+            columnPositions.add(targetPos);
 
             if (FIELD_BLOCK.canFieldReplaceBlock(world, targetPos, targetState)) {
-
                 // protect against fields stretching out to max length if unbounded
-                if (facingDirOffset == boundedFieldLength) {
-                    unconfirmedBlockPosList.clear();
-                    break;
+                if (offset > boundedFieldLength) {
+                    return null;
                 }
 
             } else {
-                // final check to see if field column can actually form - if this fails, clear the whole list to indicate failure
-                // if the collided block isn't a compatible pylon, fail
-                if (!areOpposingPylonsCompatible(originState, targetState)
-                        // trigger this if pylon distance is shorter than set one's distance - prevents uneven field generation
-                        // this only runs after the first pylon - as bounded field length hasn't been defined then
-                        || (!isOriginPylonSelected && facingDirOffset < boundedFieldLength)) {
-                    unconfirmedBlockPosList.clear();
+                // the origin pylon (the one that had the power core inserted) defines the length of the whole field.
+                // if any other pylon deviates from that, it's invalid and should be bonked.
+                if (!isOriginPylonSelected && offset != boundedFieldLength + 1) {
+                    return null;
                 }
 
-                // if fields can't replace target state, end off the loop no matter what
-                break;
+                // if the block that we've hit isn't replaceable and isn't a valid pylon, bonk the operation
+                if (!areOpposingPylonsCompatible(columnOriginState, targetState)) {
+                    return null;
+                }
+
+                // if this is triggered, we hit a compatible opposing pylon :)
+                // return the positions - we won the game
+                // contains origin pylon position, field positions, and mirrored pylon position - must differentiate when placing
+                return columnPositions;
             }
         }
 
-        // if this returns an empty list, it is indicative of placement failure
-        // contains both placed field positions and recieving pylon position - must differentiate when placing
-        return unconfirmedBlockPosList;
+        // only should trigger if it overflowed or the max length is 0 or something
+        return null;
     }
 
-    private boolean spawnForcefield(BlockState state, World world, BlockPos pos) {
-        ArrayList<BlockPos> affectedPositions = getAffectedPositions(world, state, pos);
+    private boolean spawnForcefield(BlockState state, ServerWorld serverWorld, BlockPos pos) {
+        ArrayList<BlockPos> affectedPositions = getAffectedPositions(serverWorld, state, pos);
 
         if (affectedPositions.isEmpty()) {
             return false;
@@ -309,7 +405,7 @@ public class ImpenduitPylonBlock extends Block {
 
 
         for (BlockPos updatedPos : affectedPositions) {
-            BlockState updatedState = world.getBlockState(updatedPos);
+            BlockState updatedState = serverWorld.getBlockState(updatedPos);
 
             // filter out impenduit pylons so that they aren't turned to impenduit fields
             // the only blocks that will be in this list are the pylons and replaceable blocks, so this is a fine assumption to make.
@@ -323,17 +419,17 @@ public class ImpenduitPylonBlock extends Block {
                         .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT));
 
                 // Replace the pylon state.
-                world.setBlockState(
+                serverWorld.setBlockState(
                         updatedPos,
                         pylonState
                 );
 
             } else {
                 // Drop original block's loot.
-                Block.dropStacks(world.getBlockState(updatedPos), world, updatedPos);
+                Block.dropStacks(serverWorld.getBlockState(updatedPos), serverWorld, updatedPos);
 
                 // Place the field.
-                world.setBlockState(
+                serverWorld.setBlockState(
                         updatedPos,
                         fieldState
                 );
@@ -341,23 +437,36 @@ public class ImpenduitPylonBlock extends Block {
                 // Schedule field to be updated so that it changes its state, allowing it to be destroyed on neighbor update
                 // This is a safety measure to prevent certain fucky blocks from destroying Impenduit Fields during the formation stage.
                 // (ahem. redstone dust, i'm looking at you.)
-                world.scheduleBlockTick(updatedPos, fieldState.getBlock(), 1);
+                serverWorld.scheduleBlockTick(updatedPos, fieldState.getBlock(), 1);
             }
         }
 
         return true;
     }
 
-    public boolean insertPowerCore(World world, BlockPos pos) {
-        BlockState pylonState = world.getBlockState(pos);
+    public boolean insertPowerCore(ServerWorld serverWorld, BlockPos pos) {
+        BlockState pylonState = serverWorld.getBlockState(pos);
 
         // trip sculk sensors
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
+        serverWorld.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
 
-        world.updateComparators(pos, this);
-        world.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
-        world.setBlockState(pos, pylonState.with(POWER_SOURCE_PRESENT, true));
-        return spawnForcefield(pylonState.cycle(POWER_SOURCE_PRESENT), world, pos);
+        serverWorld.updateComparators(pos, this);
+        serverWorld.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
+
+        // the pylon already being powered indicates it's already part of an active impenduit field
+        // thus, do not try to spawn one
+        if (pylonState.get(POWERED)) {
+            serverWorld.setBlockState(pos, pylonState
+                    .with(POWER_SOURCE_PRESENT, true)
+            );
+
+            // we did not spawn a forcefield
+            return false;
+        } else {
+            // if we are to spawn a forcefield, return whether it succeeded or not
+            // origin pylon state is updated in this method anyways
+            return spawnForcefield(pylonState, serverWorld, pos);
+        }
     }
 
     public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Direction manualInteractionSide) {
