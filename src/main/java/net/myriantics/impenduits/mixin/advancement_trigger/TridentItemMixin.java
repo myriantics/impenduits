@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.mixin;
+package net.myriantics.impenduits.mixin.advancement_trigger;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TridentItem.class)
-public class TridentItemMixin {
+public abstract class TridentItemMixin {
     @Inject(
             method = "onStoppedUsing",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;useRiptide(IFLnet/minecraft/item/ItemStack;)V")

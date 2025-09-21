@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.mixin;
+package net.myriantics.impenduits.mixin.rain_mimicry;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;

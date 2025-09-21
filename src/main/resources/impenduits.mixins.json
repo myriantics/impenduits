@@ -3,19 +3,19 @@
   "package": "net.myriantics.impenduits.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BoneMealItemMixin",
-    "DispenserBlockMixin",
-    "EntityMixin",
-    "FlowableFluidMixin",
-    "PistonBlockMixin",
-    "TridentItemMixin",
+    "coral_farming.BoneMealItemMixin",
+    "dispenser_behavior.DispenserBlockMixin",
+    "rain_mimicry.EntityMixin",
+    "fluid_blocking.FlowableFluidMixin",
+    "piston_behavior.PistonBlockMixin",
+    "advancement_trigger.TridentItemMixin",
     "rain_blocking.HeightmapTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "InGameOverlayRendererMixin",
+    "hud_overlay.InGameOverlayRendererMixin",
     "rain_blocking.RainSplashParticleMixin",
     "rain_blocking.WorldRendererMixin"
   ]

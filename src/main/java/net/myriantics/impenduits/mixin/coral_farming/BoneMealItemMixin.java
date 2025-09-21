@@ -1,9 +1,8 @@
-package net.myriantics.impenduits.mixin;
+package net.myriantics.impenduits.mixin.coral_farming;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.item.BoneMealItem;
-import net.minecraft.registry.tag.StructureTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
