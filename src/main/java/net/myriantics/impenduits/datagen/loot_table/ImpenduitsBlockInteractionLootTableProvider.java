@@ -1,4 +1,4 @@
-package net.myriantics.impenduits.datagen;
+package net.myriantics.impenduits.datagen.loot_table;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.SimpleFabricLootTableProvider;
