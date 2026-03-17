@@ -18,6 +18,7 @@ public abstract class ImpenduitsBlocks {
                     .noCollission()
                     .noLootTable()
                     .destroyTime(-1.0f)
+                    .forceSolidOn()
                     .pushReaction(PushReaction.BLOCK)
                     .sound(SoundType.AMETHYST)
                     .lightLevel((state) -> 8)

@@ -8,8 +8,7 @@
     "rain_mimicry.EntityMixin",
     "fluid_blocking.FlowableFluidMixin",
     "piston_behavior.PistonBlockMixin",
-    "advancement_trigger.TridentItemMixin",
-    "rain_blocking.HeightmapTypeMixin"
+    "advancement_trigger.TridentItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

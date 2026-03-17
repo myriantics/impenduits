@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -53,13 +52,13 @@ public class ImpenduitPylonBlock extends Block {
     public static final BooleanProperty POWER_SOURCE_PRESENT = ImpenduitsBlockStateProperties.POWER_SOURCE_PRESENT;
     public static final BooleanProperty POWERED = ImpenduitsBlockStateProperties.POWERED;
 
-    public final ImpenduitFieldBlock FIELD_BLOCK;
+    public final ImpenduitFieldBlock fieldBlock;
 
     public ImpenduitPylonBlock(Properties settings, ImpenduitFieldBlock fieldBlock) {
         super(settings);
 
         // if someone wanted to register a different field block then this goes to them
-        this.FIELD_BLOCK = fieldBlock;
+        this.fieldBlock = fieldBlock;
 
         registerDefaultState(this.getStateDefinition().any()
                 .setValue(FACING, Direction.UP)
@@ -365,7 +364,7 @@ public class ImpenduitPylonBlock extends Block {
             // we always want to add the target block to the list - if this operation fails for any reason it clears the list, so no reason not to
             columnPositions.add(targetPos);
 
-            if (FIELD_BLOCK.canFieldReplaceBlock(world, targetPos, targetState)) {
+            if (fieldBlock.canFieldReplaceBlock(world, targetPos, targetState)) {
                 // protect against fields stretching out to max length if unbounded
                 if (offset > boundedFieldLength) {
                     return null;
@@ -405,7 +404,7 @@ public class ImpenduitPylonBlock extends Block {
         Direction pylonFacing = state.getValue(FACING);
 
         // Prepare the field state - we only need to do this once for the whole field
-        BlockState fieldState = FIELD_BLOCK.defaultBlockState()
+        BlockState fieldState = fieldBlock.defaultBlockState()
                 .setValue(AXIS, pylonFacing.getAxis())
                 // This signifies the field is still forming, and temporarily disables field self-destruction on updates.
                 .setValue(ImpenduitFieldBlock.FORMED, false);
@@ -598,7 +597,7 @@ public class ImpenduitPylonBlock extends Block {
 
     // if it's a pylon, it's powered, and it's facing the right way, it's safe to assume that it can support a field
     public boolean canSupportField(BlockState pylonState, BlockState fieldState) {
-        return pylonState.is(this) && pylonState.getValue(POWERED) && fieldState.is(FIELD_BLOCK) && pylonState.getValue(FACING).getAxis().equals(fieldState.getValue(AXIS));
+        return pylonState.is(this) && pylonState.getValue(POWERED) && fieldState.is(fieldBlock) && pylonState.getValue(FACING).getAxis().equals(fieldState.getValue(AXIS));
     }
 
     protected boolean areNeighboringPylonsCompatible(BlockState sourcePylon, BlockState targetPylon) {
