@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +23,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
@@ -33,6 +32,7 @@ import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlockStateProperties;
 import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import net.myriantics.impenduits.tag.ImpenduitsEnchantmentTags;
+import net.myriantics.impenduits.tag.ImpenduitsEntityTypeTags;
 
 public class ImpenduitFieldBlock extends Block {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
@@ -81,13 +81,27 @@ public class ImpenduitFieldBlock extends Block {
             if (
                     EnchantmentHelper.hasTag(livingEntity.getItemBySlot(EquipmentSlot.FEET), ImpenduitsEnchantmentTags.IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS)
                     && entityShapeContext.isAbove(shape, pos, false)
-                    // since impenduit fields act as if the player is touching water, this allows for lazy hack to go brr
+                    // I now know how to properly check for Impenduit Field contact without using the overridden method, but I like this as a feature
+                    // Like you're wet from the rain so you slip through it kinda
                     && !livingEntity.isInWaterOrRain()) {
                 return shape;
             }
         }
 
         return super.getCollisionShape(state, world, pos, context);
+    }
+
+    @Override
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        if (this.shouldKillOnContact(level, state, pos, entity)) {
+            entity.kill();
+        } else {
+            super.entityInside(state, level, pos, entity);
+        }
+    }
+
+    protected boolean shouldKillOnContact(Level level, BlockState state, BlockPos pos, Entity entity) {
+        return entity.getType().is(ImpenduitsEntityTypeTags.IMPENDUIT_FIELDS_KILL_ON_CONTACT);
     }
 
     @Override
