@@ -1,26 +1,26 @@
 package net.myriantics.impenduits.registry;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.stat.StatFormatter;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.stats.StatFormatter;
+import net.minecraft.stats.Stats;
 import net.myriantics.impenduits.ImpenduitsCommon;
 
 public abstract class ImpenduitsStatistics {
-    public static Identifier IMPENDUIT_FIELDS_ACTIVATED = register("impenduit_fields_activated");
-    public static Identifier IMPENDUIT_FIELDS_DEACTIVATED = register("impenduit_fields_deactivated");
-    public static Identifier IMPENDUIT_PYLON_POWER_CORES_REMOVED = register("impenduit_pylon_power_cores_removed");
-    public static Identifier IMPENDUIT_PYLON_POWER_CORES_INSERTED = register("impenduit_pylon_power_cores_inserted");
+    public static ResourceLocation IMPENDUIT_FIELDS_ACTIVATED = register("impenduit_fields_activated");
+    public static ResourceLocation IMPENDUIT_FIELDS_DEACTIVATED = register("impenduit_fields_deactivated");
+    public static ResourceLocation IMPENDUIT_PYLON_POWER_CORES_REMOVED = register("impenduit_pylon_power_cores_removed");
+    public static ResourceLocation IMPENDUIT_PYLON_POWER_CORES_INSERTED = register("impenduit_pylon_power_cores_inserted");
 
-    private static Identifier register(String name) {
+    private static ResourceLocation register(String name) {
         return register(name, StatFormatter.DEFAULT);
     }
 
-    private static Identifier register(String name, StatFormatter statFormatter) {
-        Identifier id = ImpenduitsCommon.locate(name);
-        Registry.register(Registries.CUSTOM_STAT, name, id);
-        Stats.CUSTOM.getOrCreateStat(id, statFormatter);
+    private static ResourceLocation register(String name, StatFormatter statFormatter) {
+        ResourceLocation id = ImpenduitsCommon.locate(name);
+        Registry.register(BuiltInRegistries.CUSTOM_STAT, name, id);
+        Stats.CUSTOM.get(id, statFormatter);
         return id;
     }
 

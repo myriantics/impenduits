@@ -1,8 +1,8 @@
 package net.myriantics.impenduits.tag;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.myriantics.impenduits.ImpenduitsCommon;
 
 public abstract class ImpenduitsEnchantmentTags {
@@ -12,6 +12,6 @@ public abstract class ImpenduitsEnchantmentTags {
     public static final TagKey<Enchantment> IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS = createTag("impenduit_field_walkable");
 
     private static TagKey<Enchantment> createTag(String name) {
-        return TagKey.of(RegistryKeys.ENCHANTMENT, ImpenduitsCommon.locate(name));
+        return TagKey.create(Registries.ENCHANTMENT, ImpenduitsCommon.locate(name));
     }
 }

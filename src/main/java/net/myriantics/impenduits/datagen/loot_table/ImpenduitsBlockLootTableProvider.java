@@ -2,17 +2,17 @@ package net.myriantics.impenduits.datagen.loot_table;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.condition.BlockStatePropertyLootCondition;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.predicate.StatePredicate;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ImpenduitsBlockLootTableProvider extends FabricBlockLootTableProvider {
-    public ImpenduitsBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    public ImpenduitsBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
 
@@ -30,31 +30,31 @@ public class ImpenduitsBlockLootTableProvider extends FabricBlockLootTableProvid
 
 
     @Override
-    public void accept(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer) {
+    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
         buildImpenduitPylonLootTable(biConsumer, ImpenduitsBlocks.IMPENDUIT_PYLON, Items.HEART_OF_THE_SEA);
     }
 
-    public void buildImpenduitPylonLootTable(BiConsumer<RegistryKey<LootTable>, LootTable.Builder> biConsumer, Block pylon, Item powerCore) {
-        biConsumer.accept(pylon.getLootTableKey(), LootTable.builder()
-                .pool(
-                        LootPool.builder()
-                                .rolls(ConstantLootNumberProvider.create(1.0F))
-                                .with(
+    public void buildImpenduitPylonLootTable(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer, Block pylon, Item powerCore) {
+        biConsumer.accept(pylon.getLootTable(), LootTable.lootTable()
+                .withPool(
+                        LootPool.lootPool()
+                                .setRolls(ConstantValue.exactly(1.0F))
+                                .add(
                                         this.applyExplosionDecay(
                                                 pylon,
-                                                ItemEntry.builder(pylon)
+                                                LootItem.lootTableItem(pylon)
                                         )
                                 )
                 )
-                .pool(
-                        LootPool.builder()
-                                .conditionally(BlockStatePropertyLootCondition.builder(pylon)
-                                                .properties(StatePredicate.Builder.create().exactMatch(ImpenduitPylonBlock.POWER_SOURCE_PRESENT, true)))
-                                .rolls(ConstantLootNumberProvider.create(1.0f))
-                                .with(
+                .withPool(
+                        LootPool.lootPool()
+                                .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(pylon)
+                                                .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(ImpenduitPylonBlock.POWER_SOURCE_PRESENT, true)))
+                                .setRolls(ConstantValue.exactly(1.0f))
+                                .add(
                                         this.applyExplosionDecay(
                                                 powerCore,
-                                                ItemEntry.builder(powerCore))
+                                                LootItem.lootTableItem(powerCore))
                                 )
                 )
         );

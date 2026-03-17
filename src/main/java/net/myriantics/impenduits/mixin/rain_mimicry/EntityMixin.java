@@ -4,8 +4,8 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.myriantics.impenduits.tag.ImpenduitsBlockTags;
 import net.myriantics.impenduits.util.ImpenduitFieldStatusAccess;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +26,7 @@ public abstract class EntityMixin implements ImpenduitFieldStatusAccess {
     }
 
     @ModifyReturnValue(
-            method = "isBeingRainedOn",
+            method = "isInRain",
             at = @At(value = "RETURN")
     )
     private boolean impenduits$isBeingRainedOnOverride(boolean original) {
@@ -34,7 +34,7 @@ public abstract class EntityMixin implements ImpenduitFieldStatusAccess {
     }
 
     @Inject(
-            method = "checkBlockCollision",
+            method = "checkInsideBlocks",
             at = @At(value = "HEAD")
     )
     private void impenduits$initializeInterimVariable(CallbackInfo ci, @Share("impenduits$interimIsTouchingImpenduitField") LocalBooleanRef interimIsTouchingImpenduitField) {
@@ -42,17 +42,17 @@ public abstract class EntityMixin implements ImpenduitFieldStatusAccess {
     }
 
     @Inject(
-            method = "checkBlockCollision",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V")
+            method = "checkInsideBlocks",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;entityInside(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V")
     )
     private void impenduits$checkForImpenduitField(CallbackInfo ci, @Local BlockState checkedState, @Share("impenduits$interimIsTouchingImpenduitField") LocalBooleanRef interimIsTouchingImpenduitField) {
         if (!interimIsTouchingImpenduitField.get()) {
-            interimIsTouchingImpenduitField.set(checkedState.isIn(ImpenduitsBlockTags.ENTITY_RAIN_MIMICKING_BLOCKS));
+            interimIsTouchingImpenduitField.set(checkedState.is(ImpenduitsBlockTags.ENTITY_RAIN_MIMICKING_BLOCKS));
         }
     }
 
     @Inject(
-            method = "checkBlockCollision",
+            method = "checkInsideBlocks",
             at = @At(value = "TAIL")
     )
     private void impenduits$updateIndicatorVariable(CallbackInfo ci, @Share("impenduits$interimIsTouchingImpenduitField") LocalBooleanRef interimIsTouchingImpenduitField) {

@@ -1,8 +1,8 @@
 package net.myriantics.impenduits.tag;
 
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.myriantics.impenduits.ImpenduitsCommon;
 
 public abstract class ImpenduitsStructureTags {
@@ -12,6 +12,6 @@ public abstract class ImpenduitsStructureTags {
     public static TagKey<Structure> INTACT_IMPENDUIT_SANCTUMS = createTag("intact_impenduit_sanctums");
 
     private static TagKey<Structure> createTag(String name) {
-        return TagKey.of(RegistryKeys.STRUCTURE, ImpenduitsCommon.locate(name));
+        return TagKey.create(Registries.STRUCTURE, ImpenduitsCommon.locate(name));
     }
 }

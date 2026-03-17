@@ -1,8 +1,7 @@
 package net.myriantics.impenduits;
 
 import net.fabricmc.api.ModInitializer;
-
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.myriantics.impenduits.registry.ImpenduitsGameRules;
 import net.myriantics.impenduits.registry.ImpenduitsStatistics;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementCriteria;
@@ -17,8 +16,8 @@ public class ImpenduitsCommon implements ModInitializer {
 	public static final String MOD_ID = "impenduits";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static Identifier locate(String name) {
-		return Identifier.of(MOD_ID, name);
+    public static ResourceLocation locate(String name) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
 	}
 
     public static String locateAlt(String name) {

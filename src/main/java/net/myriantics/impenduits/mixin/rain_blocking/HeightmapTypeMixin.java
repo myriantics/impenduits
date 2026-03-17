@@ -1,7 +1,7 @@
 package net.myriantics.impenduits.mixin.rain_blocking;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.Heightmap;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 
 import java.util.function.Predicate;
 
-@Mixin(Heightmap.Type.class)
+@Mixin(Heightmap.Types.class)
 public abstract class HeightmapTypeMixin {
     @ModifyArg(
             method = "<clinit>",
@@ -18,13 +18,13 @@ public abstract class HeightmapTypeMixin {
                     value = "INVOKE",
                     // FUCKETH THOUST MCDEV FOR GASLIGHTING ME
                     // I HAD TO GO INTO THE BYTECODE TO RETRIEVE THIS GAH
-                    target = "Lnet/minecraft/world/Heightmap$Type;<init>(Ljava/lang/String;ILjava/lang/String;Lnet/minecraft/world/Heightmap$Purpose;Ljava/util/function/Predicate;)V"
+                    target = "Lnet/minecraft/world/level/levelgen/Heightmap$Types;<init>(Ljava/lang/String;ILjava/lang/String;Lnet/minecraft/world/level/levelgen/Heightmap$Usage;Ljava/util/function/Predicate;)V"
             ),
             slice = @Slice(
                     // apply this to all heightmap types starting from MOTION_BLOCKING
                     from = @At(
                             value = "INVOKE",
-                            target = "Lnet/minecraft/world/Heightmap$Type;<init>(Ljava/lang/String;ILjava/lang/String;Lnet/minecraft/world/Heightmap$Purpose;Ljava/util/function/Predicate;)V",
+                            target = "Lnet/minecraft/world/level/levelgen/Heightmap$Types;<init>(Ljava/lang/String;ILjava/lang/String;Lnet/minecraft/world/level/levelgen/Heightmap$Usage;Ljava/util/function/Predicate;)V",
                             ordinal = 4
                     )
             ),

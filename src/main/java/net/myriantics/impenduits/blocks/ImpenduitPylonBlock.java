@@ -1,34 +1,40 @@
 package net.myriantics.impenduits.blocks;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.*;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.myriantics.impenduits.datagen.loot_table.ImpenduitsBlockInteractionLootTableProvider;
 import net.myriantics.impenduits.registry.ImpenduitsGameRules;
 import net.myriantics.impenduits.registry.ImpenduitsStatistics;
@@ -42,34 +48,34 @@ import org.joml.Vector3f;
 import java.util.*;
 
 public class ImpenduitPylonBlock extends Block {
-    public static final DirectionProperty FACING = Properties.FACING;
-    public static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
     public static final BooleanProperty POWER_SOURCE_PRESENT = ImpenduitsBlockStateProperties.POWER_SOURCE_PRESENT;
     public static final BooleanProperty POWERED = ImpenduitsBlockStateProperties.POWERED;
 
     public final ImpenduitFieldBlock FIELD_BLOCK;
 
-    public ImpenduitPylonBlock(Settings settings, ImpenduitFieldBlock fieldBlock) {
+    public ImpenduitPylonBlock(Properties settings, ImpenduitFieldBlock fieldBlock) {
         super(settings);
 
         // if someone wanted to register a different field block then this goes to them
         this.FIELD_BLOCK = fieldBlock;
 
-        setDefaultState(this.getStateManager().getDefaultState()
-                .with(FACING, Direction.UP)
-                .with(AXIS, Direction.Axis.Y)
-                .with(POWER_SOURCE_PRESENT, false)
-                .with(POWERED, false));
+        registerDefaultState(this.getStateDefinition().any()
+                .setValue(FACING, Direction.UP)
+                .setValue(AXIS, Direction.Axis.Y)
+                .setValue(POWER_SOURCE_PRESENT, false)
+                .setValue(POWERED, false));
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        ItemStack handStack = player.getStackInHand(hand);
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemStack handStack = player.getItemInHand(hand);
 
-        Direction.Axis interactedAxis = hit.getSide().getAxis();
+        Direction.Axis interactedAxis = hit.getDirection().getAxis();
 
         // bonk interactions if players are in adventure mode
-        if (!player.getAbilities().allowModifyWorld) return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        if (!player.getAbilities().mayBuild) return super.useItemOn(stack, state, world, pos, player, hand, hit);
 
         // potential other interaction method that requires adventure mode players to interact with core opening sides
         /* if (!player.getAbilities().allowModifyWorld && (interactedAxis.test(state.get(FACING)) || interactedAxis.equals(state.get(AXIS))))
@@ -77,58 +83,58 @@ public class ImpenduitPylonBlock extends Block {
 
         // power source is tag-driven instead of hardcoded in case some modpack wants to rework
         // theyd also have to change the output loot table to match
-        if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE) && !state.get(POWER_SOURCE_PRESENT)) {
-            if (player instanceof ServerPlayerEntity serverPlayer) {
+        if (handStack.is(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE) && !state.getValue(POWER_SOURCE_PRESENT)) {
+            if (player instanceof ServerPlayer serverPlayer) {
 
                 // pop field activation advancement if activation was successful
-                if (insertPowerCore((ServerWorld) world, pos)) {
+                if (insertPowerCore((ServerLevel) world, pos)) {
                     ImpenduitsAdvancementTriggers.triggerImpenduitFieldActivation(serverPlayer);
-                    serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_ACTIVATED);
+                    serverPlayer.awardStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_ACTIVATED);
                 }
 
-                serverPlayer.incrementStat(Stats.USED.getOrCreateStat(handStack.getItem()));
-                serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_INSERTED);
+                serverPlayer.awardStat(Stats.ITEM_USED.get(handStack.getItem()));
+                serverPlayer.awardStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_INSERTED);
                 // decrement power core stack if player is not creative
                 if (!player.isCreative()) {
-                    handStack.decrement(1);
+                    handStack.shrink(1);
                 }
             }
-            return ItemActionResult.SUCCESS;
-        } else if (handStack.isIn(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
-                && state.get(POWER_SOURCE_PRESENT)) {
-            if (player instanceof ServerPlayerEntity serverPlayer) {
+            return ItemInteractionResult.SUCCESS;
+        } else if (handStack.is(ImpenduitsItemTags.IMPENDUIT_PYLON_POWER_SOURCE_REMOVER)
+                && state.getValue(POWER_SOURCE_PRESENT)) {
+            if (player instanceof ServerPlayer serverPlayer) {
                 // this needs a custom advancement trigger because the vanilla one is called after onUseWithItem and ignores the original state before interaction
                 // it seemed like bad practice to call the vanilla one again right here so in goes the custom one.
                 // we can trust this because POWERED is only true in survival play if the pylon is actively supporting an Impenduit Field.
-                if (state.get(POWERED)) {
+                if (state.getValue(POWERED)) {
                     ImpenduitsAdvancementCriteria.IMPENDUIT_FIELD_DEACTIVATION.trigger(serverPlayer);
-                    serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_DEACTIVATED);
+                    serverPlayer.awardStat(ImpenduitsStatistics.IMPENDUIT_FIELDS_DEACTIVATED);
                 }
 
-                serverPlayer.incrementStat(Stats.USED.getOrCreateStat(handStack.getItem()));
-                serverPlayer.incrementStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_REMOVED);
-                removePowerCore(world, pos, handStack, player, hit.getPos());
+                serverPlayer.awardStat(Stats.ITEM_USED.get(handStack.getItem()));
+                serverPlayer.awardStat(ImpenduitsStatistics.IMPENDUIT_PYLON_POWER_CORES_REMOVED);
+                removePowerCore(world, pos, handStack, player, hit.getLocation());
             }
-            return ItemActionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
 
-        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState pylonState, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pylonPos, BlockPos neighborPos) {
-        Direction pylonFacing = pylonState.get(FACING);
+    public BlockState updateShape(BlockState pylonState, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pylonPos, BlockPos neighborPos) {
+        Direction pylonFacing = pylonState.getValue(FACING);
 
         // only run this if the update comes from the pylon's emitter face
-        if (!world.isClient() && pylonFacing.equals(direction) && !canSupportField(pylonState, neighborState)) {
+        if (!world.isClientSide() && pylonFacing.equals(direction) && !canSupportField(pylonState, neighborState)) {
             // turn off the entire pylon row, because it's in an invalid state
-            deactivatePylonRow((World) world, pylonPos);
+            deactivatePylonRow((Level) world, pylonPos);
         }
 
-        return super.getStateForNeighborUpdate(pylonState, direction, neighborState, world, pylonPos, neighborPos);
+        return super.updateShape(pylonState, direction, neighborState, world, pylonPos, neighborPos);
     }
 
-    private ArrayList<BlockPos> getAffectedPositions(ServerWorld serverWorld, BlockState originPylonState, BlockPos originPylonPos) {
+    private ArrayList<BlockPos> getAffectedPositions(ServerLevel serverWorld, BlockState originPylonState, BlockPos originPylonPos) {
         ArrayList<BlockPos> affectedPositions = new ArrayList<>();
 
         // these are stored separately because the max pylon column length cannot change
@@ -136,13 +142,13 @@ public class ImpenduitPylonBlock extends Block {
         int maxPylonColumnLength = serverWorld.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH);
         int maxFieldColumnLength = maxPylonColumnLength;
 
-        final Direction.Axis pylonColumnAxis = originPylonState.get(AXIS);
+        final Direction.Axis pylonColumnAxis = originPylonState.getValue(AXIS);
 
         // this being not null indicates that a pillar has failed to form
         // selectedPylonPos will now move by 1 block each iteration in this direction.
         Direction formationDirectionAfterFailure = null;
         boolean isOriginPylonSelected = true;
-        BlockPos.Mutable selectedPylonPos = originPylonPos.mutableCopy();
+        BlockPos.MutableBlockPos selectedPylonPos = originPylonPos.mutable();
 
         for (
                 int offset = 0;
@@ -151,7 +157,7 @@ public class ImpenduitPylonBlock extends Block {
         ) {
             // figure out which direction to move the selected position
             Direction offsetDirection = formationDirectionAfterFailure == null
-                    ? Direction.from(pylonColumnAxis, offset % 2 == 0 ? Direction.AxisDirection.POSITIVE : Direction.AxisDirection.NEGATIVE)
+                    ? Direction.fromAxisAndDirection(pylonColumnAxis, offset % 2 == 0 ? Direction.AxisDirection.POSITIVE : Direction.AxisDirection.NEGATIVE)
                     : formationDirectionAfterFailure;
 
             selectedPylonPos.move(
@@ -189,7 +195,7 @@ public class ImpenduitPylonBlock extends Block {
             // null value or empty list indicates failure
             ArrayList<BlockPos> fieldColumnPositions = getFieldColumnPositions(
                     serverWorld,
-                    selectedPylonPos.toImmutable(),
+                    selectedPylonPos.immutable(),
                     originPylonState,
                     maxFieldColumnLength,
                     isOriginPylonSelected
@@ -299,14 +305,14 @@ public class ImpenduitPylonBlock extends Block {
         return affectedPositions;
     }*/
 
-    public void deactivatePylonRow(World world, BlockPos originPos) {
+    public void deactivatePylonRow(Level world, BlockPos originPos) {
         BlockState originState = world.getBlockState(originPos);
 
         // only check for pylons to disable if the pylon itself is powered - prevents recursive pointless checking
-        if (originState.isOf(this) && originState.get(POWERED)) {
+        if (originState.is(this) && originState.getValue(POWERED)) {
 
-            Direction.Axis originAxis = originState.get(AXIS);
-            Direction checkingDirection = Direction.from(originAxis, Direction.AxisDirection.NEGATIVE);
+            Direction.Axis originAxis = originState.getValue(AXIS);
+            Direction checkingDirection = Direction.fromAxisAndDirection(originAxis, Direction.AxisDirection.NEGATIVE);
 
             // tracks if the for loop has flipped directions or not - modified on first interruption, triggers loop exit on second.
             boolean flipped = false;
@@ -314,14 +320,14 @@ public class ImpenduitPylonBlock extends Block {
             // iterate through the row of pylons and unpower each one
             // the fields will deactivate themselves due to the block update
             for (int neighborOffset = 0; neighborOffset <= world.getGameRules().getInt(ImpenduitsGameRules.RULE_MAX_IMPENDUIT_FIELD_SIDE_LENGTH); neighborOffset++) {
-                BlockPos targetNeighborPos = originPos.offset(checkingDirection, neighborOffset);
+                BlockPos targetNeighborPos = originPos.relative(checkingDirection, neighborOffset);
                 BlockState targetNeighborState = world.getBlockState(targetNeighborPos);
 
                 // if pylon passes compatibility checks, set its state to powered
                 if (areNeighboringPylonsCompatible(originState, targetNeighborState)
                         // explicitly check for powered pylons to prevent separate fields that share a pylon row from deactivating each other
-                        && targetNeighborState.get(POWERED)) {
-                    world.setBlockState(targetNeighborPos, world.getBlockState(targetNeighborPos).with(POWERED, false));
+                        && targetNeighborState.getValue(POWERED)) {
+                    world.setBlockAndUpdate(targetNeighborPos, world.getBlockState(targetNeighborPos).setValue(POWERED, false));
                     continue;
                 }
 
@@ -338,13 +344,13 @@ public class ImpenduitPylonBlock extends Block {
 
                 // walk target neighbor pos back towards the origin before resetting origin - also decrement neighbor offset
                 // this serves to stop the deactivation from missing pylons that still need to get depowered
-                originPos = targetNeighborPos.offset(checkingDirection);
+                originPos = targetNeighborPos.relative(checkingDirection);
                 neighborOffset--;
             }
         }
     }
 
-    private @Nullable ArrayList<BlockPos> getFieldColumnPositions(World world, BlockPos columnOriginPos, BlockState columnOriginState, int boundedFieldLength, boolean isOriginPylonSelected) {
+    private @Nullable ArrayList<BlockPos> getFieldColumnPositions(Level world, BlockPos columnOriginPos, BlockState columnOriginState, int boundedFieldLength, boolean isOriginPylonSelected) {
         // list used to store column positions that need to be confirmed as supported before committing to the big list
         ArrayList<BlockPos> columnPositions = new ArrayList<>();
 
@@ -353,7 +359,7 @@ public class ImpenduitPylonBlock extends Block {
 
         // the opposing pylon is checked by this loop, so the field length must be bumped by 1
         for (int offset = 1; offset <= boundedFieldLength + 1; offset++) {
-            BlockPos targetPos = columnOriginPos.offset(columnOriginState.get(FACING), offset);
+            BlockPos targetPos = columnOriginPos.relative(columnOriginState.getValue(FACING), offset);
             BlockState targetState = world.getBlockState(targetPos);
 
             // we always want to add the target block to the list - if this operation fails for any reason it clears the list, so no reason not to
@@ -388,7 +394,7 @@ public class ImpenduitPylonBlock extends Block {
         return null;
     }
 
-    private boolean spawnForcefield(BlockState state, ServerWorld serverWorld, BlockPos pos) {
+    private boolean spawnForcefield(BlockState state, ServerLevel serverWorld, BlockPos pos) {
         List<BlockPos> affectedPositions = getAffectedPositions(serverWorld, state, pos);
 
         // if field formation failed, add origin pos so it gets updated
@@ -396,13 +402,13 @@ public class ImpenduitPylonBlock extends Block {
             affectedPositions = List.of(pos);
         }
 
-        Direction pylonFacing = state.get(FACING);
+        Direction pylonFacing = state.getValue(FACING);
 
         // Prepare the field state - we only need to do this once for the whole field
-        BlockState fieldState = FIELD_BLOCK.getDefaultState()
-                .with(AXIS, pylonFacing.getAxis())
+        BlockState fieldState = FIELD_BLOCK.defaultBlockState()
+                .setValue(AXIS, pylonFacing.getAxis())
                 // This signifies the field is still forming, and temporarily disables field self-destruction on updates.
-                .with(ImpenduitFieldBlock.FORMED, false);
+                .setValue(ImpenduitFieldBlock.FORMED, false);
 
 
         for (BlockPos updatedPos : affectedPositions) {
@@ -410,27 +416,27 @@ public class ImpenduitPylonBlock extends Block {
 
             // filter out impenduit pylons so that they aren't turned to impenduit fields
             // the only blocks that will be in this list are the pylons and replaceable blocks, so this is a fine assumption to make.
-            if (updatedState.isOf(this)) {
+            if (updatedState.is(this)) {
                 // Prepare the pylon state.
                 BlockState pylonState = updatedState
                         // only set it to powered if there is more than one element!
                         // if there's only one element, it's the sole source impenduit - which shouldn't be powered on if no field can be generated.
-                        .with(POWERED, affectedPositions.size() > 1)
+                        .setValue(POWERED, affectedPositions.size() > 1)
                         // update power source state if you need to, but don't overwrite it if it's already present
-                        .with(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.get(POWER_SOURCE_PRESENT));
+                        .setValue(POWER_SOURCE_PRESENT, updatedPos.equals(pos) || updatedState.getValue(POWER_SOURCE_PRESENT));
 
                 // Replace the pylon state.
-                serverWorld.setBlockState(
+                serverWorld.setBlockAndUpdate(
                         updatedPos,
                         pylonState
                 );
 
             } else {
                 // Drop original block's loot.
-                Block.dropStacks(serverWorld.getBlockState(updatedPos), serverWorld, updatedPos);
+                Block.dropResources(serverWorld.getBlockState(updatedPos), serverWorld, updatedPos);
 
                 // Place the field.
-                serverWorld.setBlockState(
+                serverWorld.setBlockAndUpdate(
                         updatedPos,
                         fieldState
                 );
@@ -438,27 +444,27 @@ public class ImpenduitPylonBlock extends Block {
                 // Schedule field to be updated so that it changes its state, allowing it to be destroyed on neighbor update
                 // This is a safety measure to prevent certain fucky blocks from destroying Impenduit Fields during the formation stage.
                 // (ahem. redstone dust, i'm looking at you.)
-                serverWorld.scheduleBlockTick(updatedPos, fieldState.getBlock(), 1);
+                serverWorld.scheduleTick(updatedPos, fieldState.getBlock(), 1);
             }
         }
 
         return affectedPositions.size() > 1;
     }
 
-    public boolean insertPowerCore(ServerWorld serverWorld, BlockPos pos) {
+    public boolean insertPowerCore(ServerLevel serverWorld, BlockPos pos) {
         BlockState pylonState = serverWorld.getBlockState(pos);
 
         // trip sculk sensors
-        serverWorld.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(pylonState));
+        serverWorld.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(pylonState));
 
-        serverWorld.updateComparators(pos, this);
-        serverWorld.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS);
+        serverWorld.updateNeighbourForOutputSignal(pos, this);
+        serverWorld.playSound(null, pos, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS);
 
         // the pylon already being powered indicates it's already part of an active impenduit field
         // thus, do not try to spawn one
-        if (pylonState.get(POWERED)) {
-            serverWorld.setBlockState(pos, pylonState
-                    .with(POWER_SOURCE_PRESENT, true)
+        if (pylonState.getValue(POWERED)) {
+            serverWorld.setBlockAndUpdate(pos, pylonState
+                    .setValue(POWER_SOURCE_PRESENT, true)
             );
 
             // we did not spawn a forcefield
@@ -470,23 +476,23 @@ public class ImpenduitPylonBlock extends Block {
         }
     }
 
-    public void removePowerCore(World world, BlockPos pylonPos, ItemStack usedStack, @Nullable PlayerEntity player, @Nullable Vec3d manualInteractionPos) {
+    public void removePowerCore(Level world, BlockPos pylonPos, ItemStack usedStack, @Nullable Player player, @Nullable Vec3 manualInteractionPos) {
         BlockState pylonState = world.getBlockState(pylonPos);
 
         // trip sculk sensors
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pylonPos, GameEvent.Emitter.of(pylonState));
+        world.gameEvent(GameEvent.BLOCK_CHANGE, pylonPos, GameEvent.Context.of(pylonState));
 
-        world.playSound(null, pylonPos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS);
-        world.setBlockState(pylonPos, pylonState.with(POWER_SOURCE_PRESENT, false));
-        world.updateComparators(pylonPos, this);
+        world.playSound(null, pylonPos, SoundEvents.GLASS_BREAK, SoundSource.BLOCKS);
+        world.setBlockAndUpdate(pylonPos, pylonState.setValue(POWER_SOURCE_PRESENT, false));
+        world.updateNeighbourForOutputSignal(pylonPos, this);
 
         // make sure we're on the server and that we either don't have a player or the player isn't creative before dropping items
         // this is because the items dropping is annoying when testing in creative
-        if (world instanceof ServerWorld serverWorld && (player == null || !player.isCreative())) {
-            Vec3d pylonCenterPos = pylonPos.toCenterPos();
+        if (world instanceof ServerLevel serverWorld && (player == null || !player.isCreative())) {
+            Vec3 pylonCenterPos = pylonPos.getCenter();
 
-            Direction pylonFacing = pylonState.get(FACING);
-            Direction.Axis pylonAxis = pylonState.get(AXIS);
+            Direction pylonFacing = pylonState.getValue(FACING);
+            Direction.Axis pylonAxis = pylonState.getValue(AXIS);
 
             // output direction is null for dispenser-automated interactions
             @Nullable Direction outputDirection = null;
@@ -502,16 +508,16 @@ public class ImpenduitPylonBlock extends Block {
                         continue;
                     }
 
-                    BlockPos neighborPos = pylonPos.offset(direction);
+                    BlockPos neighborPos = pylonPos.relative(direction);
                     BlockState neighborState = world.getBlockState(neighborPos);
 
                     // make sure neighbor position is unobstructed
-                    if (neighborState.isSideSolidFullSquare(world, neighborPos, direction.getOpposite())) {
+                    if (neighborState.isFaceSturdy(world, neighborPos, direction.getOpposite())) {
                         continue;
                     }
 
                     // if the closest direction hasn't been set yet, or it's closer than the last direction's distance, overwrite it
-                    if (closestDirection == null || closestDirection.getUnitVector().distance(relativeInteractionPos) < direction.getUnitVector().distance(relativeInteractionPos)) {
+                    if (closestDirection == null || closestDirection.step().distance(relativeInteractionPos) < direction.step().distance(relativeInteractionPos)) {
                         closestDirection = direction;
                     }
                 }
@@ -520,21 +526,21 @@ public class ImpenduitPylonBlock extends Block {
                 outputDirection = closestDirection;
             }
 
-            Identifier lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
+            ResourceLocation lootTableId = ImpenduitsBlockInteractionLootTableProvider.locatePylonPowerCoreRemovalId(pylonState.getBlock());
 
-            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableId))
-                    .generateLoot(new LootContextParameterSet.Builder(serverWorld)
-                            .add(LootContextParameters.TOOL, usedStack)
-                            .add(LootContextParameters.BLOCK_STATE, pylonState)
-                            .add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pylonPos))
-                            .build(LootContextTypes.BLOCK));
+            ObjectArrayList<ItemStack> outputStacks = serverWorld.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableId))
+                    .getRandomItems(new LootParams.Builder(serverWorld)
+                            .withParameter(LootContextParams.TOOL, usedStack)
+                            .withParameter(LootContextParams.BLOCK_STATE, pylonState)
+                            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pylonPos))
+                            .create(LootContextParamSets.BLOCK));
 
             // drop all loot table outputs
             for (ItemStack stack : outputStacks) {
                 if (outputDirection != null) {
-                    dropStack(serverWorld, pylonCenterPos.offset(outputDirection, 0.7), new Vec3d(outputDirection.getUnitVector()).multiply(1.5f / 20), stack);
+                    dropStack(serverWorld, pylonCenterPos.relative(outputDirection, 0.7), new Vec3(outputDirection.step()).scale(1.5f / 20), stack);
                 } else {
-                    ItemScatterer.spawn(serverWorld, pylonCenterPos.getX(), pylonCenterPos.getY(), pylonCenterPos.getZ(), stack);
+                    Containers.dropItemStack(serverWorld, pylonCenterPos.x(), pylonCenterPos.y(), pylonCenterPos.z(), stack);
                 }
             }
         }
@@ -542,68 +548,68 @@ public class ImpenduitPylonBlock extends Block {
         deactivatePylonRow(world, pylonPos);
     }
 
-    private void dropStack(ServerWorld serverWorld, Vec3d position, Vec3d velocity, ItemStack stack) {
+    private void dropStack(ServerLevel serverWorld, Vec3 position, Vec3 velocity, ItemStack stack) {
         ItemEntity itemEntity = new ItemEntity(serverWorld,
-                position.getX(),
-                position.getY(),
-                position.getZ(),
+                position.x(),
+                position.y(),
+                position.z(),
                 stack,
-                velocity.getX(),
-                velocity.getY(),
-                velocity.getZ()
+                velocity.x(),
+                velocity.y(),
+                velocity.z()
         );
 
-        serverWorld.spawnEntity(itemEntity);
+        serverWorld.addFreshEntity(itemEntity);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        Direction.Axis axis = ctx.getSide().getAxis();
-        Direction facing = ctx.getPlayerLookDirection().getOpposite();
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        Direction.Axis axis = ctx.getClickedFace().getAxis();
+        Direction facing = ctx.getNearestLookingDirection().getOpposite();
 
         // null protection because yeah sure (intellij was complaining so i must oblige)
-        return super.getPlacementState(ctx) == null
-                ? getDefaultState().with(FACING, facing).with(AXIS, axis)
-                : super.getPlacementState(ctx).with(FACING, facing).with(AXIS, axis);
+        return super.getStateForPlacement(ctx) == null
+                ? defaultBlockState().setValue(FACING, facing).setValue(AXIS, axis)
+                : super.getStateForPlacement(ctx).setValue(FACING, facing).setValue(AXIS, axis);
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, AXIS, POWER_SOURCE_PRESENT, POWERED);
     }
 
     @Override
-    public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        return state.get(POWER_SOURCE_PRESENT) ? 15 : 0;
+    public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+        return state.getValue(POWER_SOURCE_PRESENT) ? 15 : 0;
     }
 
 
     @Override
-    public boolean hasComparatorOutput(BlockState state) {
+    public boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     // called in PistonBlockMixin
-    public PistonBehavior getPistonBehaviorFromState(BlockState pylonState) {
+    public PushReaction getPistonBehaviorFromState(BlockState pylonState) {
         // you're only allowed to push it if it's not part of an active field
-        return pylonState.get(POWERED) ? PistonBehavior.BLOCK : PistonBehavior.NORMAL;
+        return pylonState.getValue(POWERED) ? PushReaction.BLOCK : PushReaction.NORMAL;
     }
 
     // if it's a pylon, it's powered, and it's facing the right way, it's safe to assume that it can support a field
     public boolean canSupportField(BlockState pylonState, BlockState fieldState) {
-        return pylonState.isOf(this) && pylonState.get(POWERED) && fieldState.isOf(FIELD_BLOCK) && pylonState.get(FACING).getAxis().equals(fieldState.get(AXIS));
+        return pylonState.is(this) && pylonState.getValue(POWERED) && fieldState.is(FIELD_BLOCK) && pylonState.getValue(FACING).getAxis().equals(fieldState.getValue(AXIS));
     }
 
     protected boolean areNeighboringPylonsCompatible(BlockState sourcePylon, BlockState targetPylon) {
-        return targetPylon.isOf(this)
-                && sourcePylon.get(AXIS).equals(targetPylon.get(AXIS))
-                && sourcePylon.get(FACING).equals(targetPylon.get(FACING));
+        return targetPylon.is(this)
+                && sourcePylon.getValue(AXIS).equals(targetPylon.getValue(AXIS))
+                && sourcePylon.getValue(FACING).equals(targetPylon.getValue(FACING));
     }
 
     protected boolean areOpposingPylonsCompatible(BlockState sourcePylon, BlockState targetPylon) {
-        return targetPylon.isOf(this)
-                && sourcePylon.get(AXIS).equals(targetPylon.get(AXIS))
-                && sourcePylon.get(FACING).equals(targetPylon.get(FACING).getOpposite());
+        return targetPylon.is(this)
+                && sourcePylon.getValue(AXIS).equals(targetPylon.getValue(AXIS))
+                && sourcePylon.getValue(FACING).equals(targetPylon.getValue(FACING).getOpposite());
     }
 }

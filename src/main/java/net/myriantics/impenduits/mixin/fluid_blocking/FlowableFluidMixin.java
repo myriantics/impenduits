@@ -2,18 +2,18 @@ package net.myriantics.impenduits.mixin.fluid_blocking;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.block.Block;
-import net.minecraft.fluid.FlowableFluid;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.myriantics.impenduits.blocks.ImpenduitFieldBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(FlowableFluid.class)
+@Mixin(FlowingFluid.class)
 public abstract class FlowableFluidMixin {
 
     @ModifyExpressionValue(
-            method = "canFill",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isOf(Lnet/minecraft/block/Block;)Z",
+            method = "canHoldFluid",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z",
             ordinal = 0)
     )
     private boolean impenduitFieldOverride(boolean original, @Local Block block) {

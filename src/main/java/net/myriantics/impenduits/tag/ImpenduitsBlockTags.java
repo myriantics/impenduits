@@ -1,8 +1,8 @@
 package net.myriantics.impenduits.tag;
 
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.myriantics.impenduits.ImpenduitsCommon;
 
 public abstract class ImpenduitsBlockTags {
@@ -20,6 +20,6 @@ public abstract class ImpenduitsBlockTags {
     public static final TagKey<Block> ENTITY_RAIN_MIMICKING_BLOCKS = createTag("entity_rain_mimicking_blocks");
 
     private static TagKey<Block> createTag(String name) {
-        return TagKey.of(RegistryKeys.BLOCK, ImpenduitsCommon.locate(name));
+        return TagKey.create(Registries.BLOCK, ImpenduitsCommon.locate(name));
     }
 }

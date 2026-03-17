@@ -2,11 +2,17 @@ package net.myriantics.impenduits.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.minecraft.block.Block;
-import net.minecraft.data.client.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.blockstates.BlockStateGenerator;
+import net.minecraft.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.data.models.blockstates.Variant;
+import net.minecraft.data.models.blockstates.VariantProperties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.blocks.ImpenduitPylonBlock;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
@@ -17,36 +23,36 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
     }
 
     @Override
-    public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
+    public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
         registerImpenduitPylonBlock(blockStateModelGenerator);
         registerImpenduitFieldBlock(blockStateModelGenerator);
     }
 
-    private void registerImpenduitFieldBlock(BlockStateModelGenerator generator) {
-        BlockStateSupplier supplier = BlockStateModelGenerator.createAxisRotatedBlockState(ImpenduitsBlocks.IMPENDUIT_FIELD, ImpenduitsCommon.locate("block/impenduit_field"));
+    private void registerImpenduitFieldBlock(BlockModelGenerators generator) {
+        BlockStateGenerator supplier = BlockModelGenerators.createAxisAlignedPillarBlock(ImpenduitsBlocks.IMPENDUIT_FIELD, ImpenduitsCommon.locate("block/impenduit_field"));
 
-        generator.blockStateCollector.accept(supplier);
+        generator.blockStateOutput.accept(supplier);
     }
 
-    private void registerImpenduitPylonBlock(BlockStateModelGenerator generator) {
-        BlockStateVariant singleton_powered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_core"));
-        BlockStateVariant singleton_unpowered_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
-        BlockStateVariant singleton_powered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
-        BlockStateVariant singleton_unpowered_no_core = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
-        BlockStateVariant axis_powered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_z"));
-        BlockStateVariant axis_unpowered_no_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
-        BlockStateVariant axis_powered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_z"));
-        BlockStateVariant axis_unpowered_core_z = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_z"));
-        BlockStateVariant axis_powered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_x"));
-        BlockStateVariant axis_unpowered_no_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_x"));
-        BlockStateVariant axis_powered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_x"));
-        BlockStateVariant axis_unpowered_core_x = BlockStateVariant.create().put(VariantSettings.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
+    private void registerImpenduitPylonBlock(BlockModelGenerators generator) {
+        Variant singleton_powered_core = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_core"));
+        Variant singleton_unpowered_core = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_core"));
+        Variant singleton_powered_no_core = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_powered_no_core"));
+        Variant singleton_unpowered_no_core = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_singleton_unpowered_no_core"));
+        Variant axis_powered_no_core_z = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_z"));
+        Variant axis_unpowered_no_core_z = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
+        Variant axis_powered_core_z = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_z"));
+        Variant axis_unpowered_core_z = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_z"));
+        Variant axis_powered_no_core_x = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_no_core_x"));
+        Variant axis_unpowered_no_core_x = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_x"));
+        Variant axis_powered_core_x = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_powered_core_x"));
+        Variant axis_unpowered_core_x = Variant.variant().with(VariantProperties.MODEL, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_core_x"));
 
-        generator.registerParentedItemModel(ImpenduitsBlocks.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
+        generator.delegateItemModel(ImpenduitsBlocks.IMPENDUIT_PYLON, getNestedBlockSubModelId(ImpenduitsBlocks.IMPENDUIT_PYLON, "_axis_unpowered_no_core_z"));
 
-        BlockStateVariantMap.QuadrupleProperty<Direction, Direction.Axis, Boolean, Boolean> map = BlockStateVariantMap.create(ImpenduitPylonBlock.FACING, ImpenduitPylonBlock.AXIS, ImpenduitPylonBlock.POWERED, ImpenduitPylonBlock.POWER_SOURCE_PRESENT);
+        PropertyDispatch.C4<Direction, Direction.Axis, Boolean, Boolean> map = PropertyDispatch.properties(ImpenduitPylonBlock.FACING, ImpenduitPylonBlock.AXIS, ImpenduitPylonBlock.POWERED, ImpenduitPylonBlock.POWER_SOURCE_PRESENT);
 
-        VariantsBlockStateSupplier supplier = VariantsBlockStateSupplier.create(ImpenduitsBlocks.IMPENDUIT_PYLON);
+        MultiVariantGenerator supplier = MultiVariantGenerator.multiVariant(ImpenduitsBlocks.IMPENDUIT_PYLON);
 
         // iterate through all facing values
         for (Direction facing : Direction.values()) {
@@ -54,61 +60,61 @@ public class ImpenduitsModelProvider extends FabricModelProvider {
             // iterate through all axes
             for (Direction.Axis axis : Direction.Axis.values()) {
                 if (axis == facingAxis) {
-                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_unpowered_no_core))
-                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_unpowered_core))
-                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_no_core))
-                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), singleton_powered_core));
+                    map.select(facing, axis, false, false, Variant.merge(impenduitFromOrientation(facing, axis), singleton_unpowered_no_core))
+                            .select(facing, axis, false, true, Variant.merge(impenduitFromOrientation(facing, axis), singleton_unpowered_core))
+                            .select(facing, axis, true, false, Variant.merge(impenduitFromOrientation(facing, axis), singleton_powered_no_core))
+                            .select(facing, axis, true, true, Variant.merge(impenduitFromOrientation(facing, axis), singleton_powered_core));
                 } else {
                     boolean shouldRotate = shouldRotate(facing, axis);
-                    map.register(facing, axis, false, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_no_core_z : axis_unpowered_no_core_x))
-                            .register(facing, axis, false, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_core_z : axis_unpowered_core_x))
-                            .register(facing, axis, true, false, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_no_core_z : axis_powered_no_core_x))
-                            .register(facing, axis, true, true, BlockStateVariant.union(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_core_z : axis_powered_core_x));
+                    map.select(facing, axis, false, false, Variant.merge(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_no_core_z : axis_unpowered_no_core_x))
+                            .select(facing, axis, false, true, Variant.merge(impenduitFromOrientation(facing, axis), shouldRotate ? axis_unpowered_core_z : axis_unpowered_core_x))
+                            .select(facing, axis, true, false, Variant.merge(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_no_core_z : axis_powered_no_core_x))
+                            .select(facing, axis, true, true, Variant.merge(impenduitFromOrientation(facing, axis), shouldRotate ? axis_powered_core_z : axis_powered_core_x));
                 }
             }
         }
 
-        supplier.coordinate(map);
+        supplier.with(map);
 
-        generator.blockStateCollector.accept(supplier);
+        generator.blockStateOutput.accept(supplier);
 
     }
 
     @Override
-    public void generateItemModels(ItemModelGenerator itemModelGenerator) {
+    public void generateItemModels(ItemModelGenerators itemModelGenerator) {
 
     }
 
-    private static Identifier getNestedBlockSubModelId(Block block, String suffix) {
-        Identifier identifier = Registries.BLOCK.getId(block);
+    private static ResourceLocation getNestedBlockSubModelId(Block block, String suffix) {
+        ResourceLocation identifier = BuiltInRegistries.BLOCK.getKey(block);
         return identifier.withPath((path) -> {
             return "block/" + identifier.getPath() + "/" + path + suffix;
         });
     }
 
-    private static BlockStateVariant impenduitFromOrientation(Direction facing, Direction.Axis axis) {
+    private static Variant impenduitFromOrientation(Direction facing, Direction.Axis axis) {
 
-        BlockStateVariant base = BlockStateVariant.create();
+        Variant base = Variant.variant();
 
         switch(facing) {
             case UP -> {
-                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90);
+                return base.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90);
             }
             case DOWN -> {
-                return base.put(VariantSettings.Y, VariantSettings.Rotation.R90).put(VariantSettings.X, VariantSettings.Rotation.R180);
+                return base.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.X_ROT, VariantProperties.Rotation.R180);
             }
             case NORTH -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R90);
+                return base.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90);
             }
             case SOUTH -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R270);
+                return base.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270);
 
             }
             case EAST -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R90).put(VariantSettings.Y, VariantSettings.Rotation.R90);
+                return base.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90);
             }
             case WEST -> {
-                return base.put(VariantSettings.X, VariantSettings.Rotation.R90).put(VariantSettings.Y, VariantSettings.Rotation.R270);
+                return base.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
             }
             default -> {
                 return base;

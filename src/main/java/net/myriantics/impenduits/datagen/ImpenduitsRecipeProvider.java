@@ -2,31 +2,31 @@ package net.myriantics.impenduits.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
-import net.minecraft.data.server.recipe.RecipeExporter;
-import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.item.Items;
 import net.myriantics.impenduits.registry.block.ImpenduitsBlocks;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ImpenduitsRecipeProvider extends FabricRecipeProvider {
-    public ImpenduitsRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+    public ImpenduitsRecipeProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
     @Override
-    public void generate(RecipeExporter recipeExporter) {
-        ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, ImpenduitsBlocks.IMPENDUIT_PYLON, 4)
-                .input('D', Items.DARK_PRISMARINE)
-                .input('L', Items.SEA_LANTERN)
-                .input('C', Items.PRISMARINE_CRYSTALS)
-                .input('B', Items.PRISMARINE_BRICKS)
+    public void buildRecipes(RecipeOutput recipeExporter) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ImpenduitsBlocks.IMPENDUIT_PYLON, 4)
+                .define('D', Items.DARK_PRISMARINE)
+                .define('L', Items.SEA_LANTERN)
+                .define('C', Items.PRISMARINE_CRYSTALS)
+                .define('B', Items.PRISMARINE_BRICKS)
                 .pattern("CCC")
                 .pattern("DLD")
                 .pattern("BDB")
-                .criterion("heart_of_the_sea", conditionsFromItem(Items.HEART_OF_THE_SEA))
-                .offerTo(recipeExporter);
+                .unlockedBy("heart_of_the_sea", has(Items.HEART_OF_THE_SEA))
+                .save(recipeExporter);
     }
 }

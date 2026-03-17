@@ -2,29 +2,30 @@ package net.myriantics.impenduits.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.advancement.criterion.ItemCriterion;
-import net.minecraft.advancement.criterion.TickCriterion;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.predicate.BlockPredicate;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.predicate.StatePredicate;
-import net.minecraft.predicate.entity.EntityEquipmentPredicate;
-import net.minecraft.predicate.entity.EntityFlagsPredicate;
-import net.minecraft.predicate.entity.EntityPredicate;
-import net.minecraft.predicate.entity.LocationPredicate;
-import net.minecraft.predicate.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
+import net.minecraft.advancements.critereon.EntityFlagsPredicate;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemEnchantmentsPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicates;
+import net.minecraft.advancements.critereon.LocationPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.advancement.criterion.ImpenduitFieldActivationCriterion;
 import net.myriantics.impenduits.advancement.criterion.ImpenduitFieldDeactivationCriterion;
@@ -43,116 +44,116 @@ import java.util.function.Function;
 
 public class ImpenduitsAdvancementProvider extends FabricAdvancementProvider {
 
-    private CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup;
+    private CompletableFuture<HolderLookup.Provider> registryLookup;
 
-    public ImpenduitsAdvancementProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    public ImpenduitsAdvancementProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(output, registryLookup);
         this.registryLookup = registryLookup;
     }
 
     @Override
-    public void generateAdvancement(RegistryWrapper.WrapperLookup wrapperLookup, Consumer<AdvancementEntry> consumer) {
+    public void generateAdvancement(HolderLookup.Provider wrapperLookup, Consumer<AdvancementHolder> consumer) {
 
-        RegistryWrapper.Impl<Enchantment> impl = wrapperLookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
+        HolderLookup.RegistryLookup<Enchantment> impl = wrapperLookup.lookupOrThrow(Registries.ENCHANTMENT);
 
-        AdvancementEntry activateField = create((builder -> builder
-                .parent(new AdvancementEntry(Identifier.ofVanilla("adventure/root"), null))
+        AdvancementHolder activateField = create((builder -> builder
+                .parent(new AdvancementHolder(ResourceLocation.withDefaultNamespace("adventure/root"), null))
                 .display(
                         ImpenduitsItems.IMPENDUIT_PYLON,
-                        Text.translatable("advancements.adventure.activate_impenduit_field.title"),
-                        Text.translatable("advancements.adventure.activate_impenduit_field.description"),
+                        Component.translatable("advancements.adventure.activate_impenduit_field.title"),
+                        Component.translatable("advancements.adventure.activate_impenduit_field.description"),
                         null,
-                        AdvancementFrame.TASK,
+                        AdvancementType.TASK,
                         true,
                         true,
                         false
                 )
-                .criterion(
+                .addCriterion(
                         "activate_impenduit_field",
                         ImpenduitFieldActivationCriterion.Conditions.create()
                 )
-                .build(consumer, ImpenduitsCommon.locate("activate_impenduit_field").toString())
+                .save(consumer, ImpenduitsCommon.locate("activate_impenduit_field").toString())
         ));
 
-        AdvancementEntry deactivateField = create((builder -> builder
+        AdvancementHolder deactivateField = create((builder -> builder
                 .parent(activateField)
                 .display(
                         Items.IRON_PICKAXE,
-                        Text.translatable("advancements.adventure.deactivate_impenduit_field.title"),
-                        Text.translatable("advancements.adventure.deactivate_impenduit_field.description"),
+                        Component.translatable("advancements.adventure.deactivate_impenduit_field.title"),
+                        Component.translatable("advancements.adventure.deactivate_impenduit_field.description"),
                         null,
-                        AdvancementFrame.TASK,
+                        AdvancementType.TASK,
                         true,
                         true,
                         false
                 )
-                .criterion(
+                .addCriterion(
                         "deactivate_impenduit_field",
                         ImpenduitFieldDeactivationCriterion.Conditions.create()
                 )
-                .build(consumer, ImpenduitsCommon.locate("deactivate_impenduit_field").toString())
+                .save(consumer, ImpenduitsCommon.locate("deactivate_impenduit_field").toString())
         ));
 
-        AdvancementEntry frostWalkOnField = create((builder -> builder
+        AdvancementHolder frostWalkOnField = create((builder -> builder
                 .parent(activateField)
                 .display(
-                        new ItemStack(Registries.ITEM.getEntry(Items.IRON_BOOTS), 1, ComponentChanges.builder().add(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true).build()),
-                        Text.translatable("advancements.adventure.walk_on_impenduit_field_with_frost_walker.title"),
-                        Text.translatable("advancements.adventure.walk_on_impenduit_field_with_frost_walker.description"),
+                        new ItemStack(BuiltInRegistries.ITEM.wrapAsHolder(Items.IRON_BOOTS), 1, DataComponentPatch.builder().set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true).build()),
+                        Component.translatable("advancements.adventure.walk_on_impenduit_field_with_frost_walker.title"),
+                        Component.translatable("advancements.adventure.walk_on_impenduit_field_with_frost_walker.description"),
                         null,
-                        AdvancementFrame.GOAL,
+                        AdvancementType.GOAL,
                         true,
                         true,
                         false
                 )
-                .criterion(
+                .addCriterion(
                         "walk_on_impenduit_field_with_frost_walker",
-                        TickCriterion.Conditions.createLocation(EntityPredicate.Builder.create()
-                                .equipment(EntityEquipmentPredicate.Builder.create().feet(
-                                            ItemPredicate.Builder.create().subPredicate(
-                                                    ItemSubPredicateTypes.ENCHANTMENTS,
-                                                    EnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
+                        PlayerTrigger.TriggerInstance.located(EntityPredicate.Builder.entity()
+                                .equipment(EntityEquipmentPredicate.Builder.equipment().feet(
+                                            ItemPredicate.Builder.item().withSubPredicate(
+                                                    ItemSubPredicates.ENCHANTMENTS,
+                                                    ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
                                                             impl.getOrThrow(ImpenduitsEnchantmentTags.IMPENDUIT_FIELD_WALKABLE_ENCHANTMENTS),
-                                                            NumberRange.IntRange.atLeast(1))
+                                                            MinMaxBounds.Ints.atLeast(1))
                                                     ))
                                             )))
                                 .flags(
-                                        EntityFlagsPredicate.Builder.create().onGround(true)
+                                        EntityFlagsPredicate.Builder.flags().setOnGround(true)
                                 )
                                 .steppingOn(
-                                        LocationPredicate.Builder.create().block(
-                                                BlockPredicate.Builder.create().blocks(
+                                        LocationPredicate.Builder.location().setBlock(
+                                                BlockPredicate.Builder.block().of(
                                                         ImpenduitsBlocks.IMPENDUIT_FIELD
                                                 )
                                         )
                                 )
                         )
                 )
-                .build(consumer, ImpenduitsCommon.locate("walk_on_impenduit_field_with_frost_walker").toString())
+                .save(consumer, ImpenduitsCommon.locate("walk_on_impenduit_field_with_frost_walker").toString())
         ));
 
-        AdvancementEntry ultrawarmRiptide = create((builder -> builder
+        AdvancementHolder ultrawarmRiptide = create((builder -> builder
                 .parent(activateField)
                 .display(
-                        new ItemStack(Registries.ITEM.getEntry(Items.TRIDENT), 1, ComponentChanges.builder().add(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true).build()),
-                        Text.translatable("advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.title"),
-                        Text.translatable("advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.description"),
+                        new ItemStack(BuiltInRegistries.ITEM.wrapAsHolder(Items.TRIDENT), 1, DataComponentPatch.builder().set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true).build()),
+                        Component.translatable("advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.title"),
+                        Component.translatable("advancements.nether.use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field.description"),
                         null,
-                        AdvancementFrame.CHALLENGE,
+                        AdvancementType.CHALLENGE,
                         true,
                         true,
                         true
                 )
-                .criterion(
+                .addCriterion(
                         "use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field",
                         UltrawarmImpenduitFieldRiptideCriterion.Conditions.create()
                 )
-                .build(consumer, ImpenduitsCommon.locate("use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field").toString())
+                .save(consumer, ImpenduitsCommon.locate("use_riptide_in_ultrawarm_dimension_while_touching_impenduit_field").toString())
         ));
     }
 
 
-    private AdvancementEntry create(Function<Advancement.Builder, AdvancementEntry> consumer) {
-        return consumer.apply(Advancement.Builder.create());
+    private AdvancementHolder create(Function<Advancement.Builder, AdvancementHolder> consumer) {
+        return consumer.apply(Advancement.Builder.advancement());
     }
 }

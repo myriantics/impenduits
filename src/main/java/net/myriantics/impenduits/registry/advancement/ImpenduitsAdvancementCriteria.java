@@ -1,8 +1,8 @@
 package net.myriantics.impenduits.registry.advancement;
 
-import net.minecraft.advancement.criterion.Criterion;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.myriantics.impenduits.ImpenduitsCommon;
 import net.myriantics.impenduits.advancement.criterion.ImpenduitFieldActivationCriterion;
 import net.myriantics.impenduits.advancement.criterion.ImpenduitFieldDeactivationCriterion;
@@ -14,8 +14,8 @@ public abstract class ImpenduitsAdvancementCriteria {
     public static final ImpenduitFieldActivationCriterion IMPENDUIT_FIELD_ACTIVATION = register("impenduit_field_activation", new ImpenduitFieldActivationCriterion());
     public static final ImpenduitFieldDeactivationCriterion IMPENDUIT_FIELD_DEACTIVATION = register("impenduit_field_deactivation", new ImpenduitFieldDeactivationCriterion());
 
-    private static <T extends Criterion<?>> T register(String name, T criterion) {
-        return Registry.register(Registries.CRITERION, ImpenduitsCommon.locate(name), criterion);
+    private static <T extends CriterionTrigger<?>> T register(String name, T criterion) {
+        return Registry.register(BuiltInRegistries.TRIGGER_TYPES, ImpenduitsCommon.locate(name), criterion);
     }
 
     public static void init() {

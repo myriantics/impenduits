@@ -1,10 +1,10 @@
 package net.myriantics.impenduits.mixin.advancement_trigger;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.TridentItem;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.level.Level;
 import net.myriantics.impenduits.registry.advancement.ImpenduitsAdvancementTriggers;
 import net.myriantics.impenduits.util.ImpenduitFieldStatusAccess;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TridentItem.class)
 public abstract class TridentItemMixin {
     @Inject(
-            method = "onStoppedUsing",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;useRiptide(IFLnet/minecraft/item/ItemStack;)V")
+            method = "releaseUsing",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;startAutoSpinAttack(IFLnet/minecraft/world/item/ItemStack;)V")
     )
-    private void impenduits$triggerRiptideInUltrawarmAdvancement(ItemStack stack, World world, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
+    private void impenduits$triggerRiptideInUltrawarmAdvancement(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
         // trigger advancement if player uses riptide while touching impenduit field
-        if (user instanceof ServerPlayerEntity serverPlayer && user instanceof ImpenduitFieldStatusAccess access && access.impenduits$isTouchingImpenduitField()) {
+        if (user instanceof ServerPlayer serverPlayer && user instanceof ImpenduitFieldStatusAccess access && access.impenduits$isTouchingImpenduitField()) {
             ImpenduitsAdvancementTriggers.triggerUltrawarmImpenduitFieldRiptide(serverPlayer);
         }
     }

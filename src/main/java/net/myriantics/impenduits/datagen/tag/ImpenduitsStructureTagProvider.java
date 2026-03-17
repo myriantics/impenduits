@@ -2,22 +2,20 @@ package net.myriantics.impenduits.datagen.tag;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.myriantics.impenduits.tag.ImpenduitsStructureTags;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ImpenduitsStructureTagProvider extends FabricTagProvider<Structure> {
-    public ImpenduitsStructureTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
-        super(output, RegistryKeys.STRUCTURE, registriesFuture);
+    public ImpenduitsStructureTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, Registries.STRUCTURE, registriesFuture);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
+    protected void addTags(HolderLookup.Provider wrapperLookup) {
         getOrCreateTagBuilder(ImpenduitsStructureTags.BONEMEAL_SPAWNS_CORAL_FANS_WITHIN)
                 .forceAddTag(ImpenduitsStructureTags.INTACT_IMPENDUIT_SANCTUMS);
         getOrCreateTagBuilder(ImpenduitsStructureTags.IMPENDUIT_SANCTUMS)
