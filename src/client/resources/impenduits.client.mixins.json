@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.myriantics.impenduits.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "hud_overlay.ScreenEffectRendererMixin",
+    "rain_blocking.WaterDropParticleMixin",
+    "rain_blocking.LevelRendererMixin"
+  ]
+}

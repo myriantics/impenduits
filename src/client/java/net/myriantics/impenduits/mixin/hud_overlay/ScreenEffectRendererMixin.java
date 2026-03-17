@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ScreenEffectRenderer.class)
-public abstract class InGameOverlayRendererMixin {
+public abstract class ScreenEffectRendererMixin {
 
     @ModifyExpressionValue(
             method = "renderScreenEffect",

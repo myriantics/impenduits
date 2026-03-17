@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(PistonBaseBlock.class)
-public abstract class PistonBlockMixin {
+public abstract class PistonBaseBlockMixin {
 
     @ModifyExpressionValue(
             method = "isPushable",

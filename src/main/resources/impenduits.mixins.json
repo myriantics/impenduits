@@ -6,16 +6,11 @@
     "coral_farming.BoneMealItemMixin",
     "dispenser_behavior.DispenserBlockMixin",
     "rain_mimicry.EntityMixin",
-    "fluid_blocking.FlowableFluidMixin",
-    "piston_behavior.PistonBlockMixin",
+    "fluid_blocking.FlowingFluidMixin",
+    "piston_behavior.PistonBaseBlockMixin",
     "advancement_trigger.TridentItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "client": [
-    "hud_overlay.InGameOverlayRendererMixin",
-    "rain_blocking.RainSplashParticleMixin",
-    "rain_blocking.WorldRendererMixin"
-  ]
+  }
 }

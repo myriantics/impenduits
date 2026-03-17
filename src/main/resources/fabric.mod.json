@@ -29,7 +29,11 @@
 		]
 	},
 	"mixins": [
-		"impenduits.mixins.json"
+		"impenduits.mixins.json",
+		{
+			"config": "impenduits.client.mixins.json",
+			"environment": "client"
+		}
 	],
 	"depends": {
 		"fabricloader": ">=0.15.6",

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Slice;
 
 @Mixin(FlowingFluid.class)
-public abstract class FlowableFluidMixin {
+public abstract class FlowingFluidMixin {
 
     @ModifyExpressionValue(
             method = "canHoldFluid",
